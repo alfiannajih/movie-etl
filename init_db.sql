@@ -189,25 +189,25 @@ ALTER TABLE "episode_crew" ADD CONSTRAINT "fk_episode_crew_to_tv_episodes" FOREI
 
 ALTER TABLE "episode_crew" ADD CONSTRAINT "fk_episode_crew_to_people" FOREIGN KEY ("person_id") REFERENCES "people" ("person_id");
 
-CREATE UNIQUE INDEX "movie_production_index" ON movie_production (movie_id, company_id);
+CREATE UNIQUE INDEX "movie_production_index" ON movie_production ("movie_id", "company_id");
 
-CREATE UNIQUE INDEX "movie_language_index" ON movie_language (movie_id, language_id);
+CREATE UNIQUE INDEX "movie_language_index" ON movie_language ("movie_id", "language_id");
 
-CREATE UNIQUE INDEX "movie_genre_index" ON movie_genre (movie_id, genre_id);
+CREATE UNIQUE INDEX "movie_genre_index" ON movie_genre ("movie_id", "genre_id");
 
-CREATE UNIQUE INDEX "movie_cast_index" ON movie_cast (movie_id, person_id);
+CREATE UNIQUE INDEX "movie_cast_index" ON movie_cast ("movie_id", "person_id", "character");
 
-CREATE UNIQUE INDEX "movie_crew_index" ON movie_crew (movie_id, person_id);
+CREATE UNIQUE INDEX "movie_crew_index" ON movie_crew ("movie_id", "person_id", "job", "department");
 
-CREATE UNIQUE INDEX "series_production_index" ON series_production (series_id, company_id);
+CREATE UNIQUE INDEX "series_production_index" ON series_production ("series_id", "company_id");
 
-CREATE UNIQUE INDEX "series_language_index" ON series_language (series_id, language_id);
+CREATE UNIQUE INDEX "series_language_index" ON series_language ("series_id", "language_id");
 
-CREATE UNIQUE INDEX "series_genre_index" ON series_genre (series_id, genre_id);
+CREATE UNIQUE INDEX "series_genre_index" ON series_genre ("series_id", "genre_id");
 
-CREATE UNIQUE INDEX "episode_cast_index" ON episode_cast (episode_id, person_id);
+CREATE UNIQUE INDEX "episode_cast_index" ON episode_cast ("episode_id", "person_id", "character");
 
-CREATE UNIQUE INDEX "episode_crew_index" ON episode_crew (episode_id, person_id);
+CREATE UNIQUE INDEX "episode_crew_index" ON episode_crew ("episode_id", "person_id", "job", "department");
 
 INSERT INTO "languages"
 ("language_id", "language")
