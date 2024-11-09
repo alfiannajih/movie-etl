@@ -1,8 +1,9 @@
 import numpy as np
 from typing import List, Dict
 import requests
-from prefect import task
+from prefect import task, get_run_logger
 import os
+from sqlalchemy.engine.base import Engine
 
 from src.movie_etl.utils.etl import map_gender
 
@@ -63,7 +64,7 @@ def get_movie_ids(
     name="Retrieve Data from TMDB API",
     log_prints=True,
     retries=2,
-    task_run_name="retrieve-{endpoint}-of-{id}"
+    task_run_name="retrieve-data-id-{id}-from-{endpoint}"
 )
 def get_data_from_tmdb_api(
     id: int,
@@ -114,6 +115,13 @@ def clean_movie_details(
 
     spoken_languages = [language["iso_639_1"] for language in movie_details["spoken_languages"]]
 
+    genres = [
+        {
+            "genre_id": genre["id"],
+            "genre": genre["name"]
+        } for genre in movie_details["genres"]
+    ]
+
     return {
         "collection_id": movie_details["belongs_to_collection"]["id"] if movie_details["belongs_to_collection"] != None else None,
         "movie_id": movie_details["id"],
@@ -127,7 +135,7 @@ def clean_movie_details(
         "budget": movie_details["budget"] if movie_details["budget"] != 0 else None,
         "revenue": movie_details["revenue"] if movie_details["revenue"] != 0 else None,
         "runtime": movie_details["runtime"] if movie_details["runtime"] != 0 else None,
-        "genres": movie_details["genres"],
+        "genres": genres,
         "casts": casts,
         "crews": crews,
         "production_companies": production_companies,
@@ -188,138 +196,34 @@ def clean_person_details(
         "popularity": person_details["popularity"] if person_details["popularity"] != 0 else None
     }
 
-# @task(
-#     name="Retrieve Movie Details",
-#     log_prints=True,
-#     retries=2,
-#     task_run_name="get-movie-details-of-{movie_id}"
-# )
-# def get_movie_details(
-#     movie_id: int,
-#     url: str="https://api.themoviedb.org/3/movie"
-# ) -> Dict:
-#     # logger = get_run_logger()
-#     # logger.info("Start retrieving movie details for movie_id: " + str(movie_id))
+@task(
+    name="Load Data to DB",
+    log_prints=True,
+    task_run_name="load-data-id-{id}-to-db-{table_name}"
+)
+def load_data_to_db(
+    table_name: str,
+    id: int,
+    data: Dict,
+    engine: Engine
+):
+    logger = get_run_logger()
+    connection = engine.raw_connection()
     
-#     params = {
-#         "append_to_response": "credits"
-#     }
-
-#     response = requests.get(
-#         f"{url}/{movie_id}",
-#         headers=headers,
-#         params=params
-#     ).json()
-
-#     casts = [
-#         {
-#             "person_id": cast["id"],
-#             "character": cast["character"]
-#         } for cast in response["credits"]["cast"]
-#     ]
-
-#     crews = [
-#         {
-#             "person_id": crew["id"],
-#             "job": crew["job"],
-#             "department": crew["department"]
-#         } for crew in response["credits"]["crew"]
-#     ]
-
-#     production_companies = [company["id"] for company in response["production_companies"]]
-
-#     spoken_languages = [language["iso_639_1"] for language in response["spoken_languages"]]
-
-#     return {
-#         "collection_id": response["belongs_to_collection"]["id"] if response["belongs_to_collection"] != None else None,
-#         "movie_id": movie_id,
-#         "imdb_id": response["imdb_id"],
-#         "title": response["title"],
-#         "overview": response["overview"],
-#         "release_date": response["release_date"],
-#         "popularity": response["popularity"],
-#         "vote_average": response["vote_average"],
-#         "vote_count": response["vote_count"],
-#         "budget": response["budget"] if response["budget"] != 0 else None,
-#         "revenue": response["revenue"] if response["revenue"] !=0 else None,
-#         "runtime": response["runtime"],
-#         "genres": response["genres"],
-#         "casts": casts,
-#         "crews": crews,
-#         "production_companies": production_companies,
-#         "spoken_languages": spoken_languages
-#     }
-
-# @task(
-#     name="Retrieve Collection Details",
-#     log_prints=True,
-#     retries=2,
-#     task_run_name="get-collection-details-of-{collection_id}"
-# )
-# def get_collection_details(
-#     collection_id: int,
-#     url: str="https://api.themoviedb.org/3/collection"
-# ) -> Dict:
-#     # logger = get_run_logger()
-#     # logger.info("Start retrieving collection details for collection_id: " + str(collection_id))
-#     response = requests.get(
-#         f"{url}/{collection_id}",
-#         headers=headers
-#     ).json()
-
-#     return {
-#         "collection_id": collection_id,
-#         "name": response["name"],
-#         "overview": response["overview"]
-#     }
-
-# @task(
-#     name="Retrieve Company Details",
-#     log_prints=True,
-#     retries=2,
-#     task_run_name="get-company-details-of-{company_id}"
-# )
-# def get_company_details(
-#     company_id: int,
-#     url: str="https://api.themoviedb.org/3/company"
-# ) -> Dict:
-#     response = requests.get(
-#         f"{url}/{company_id}",
-#         headers=headers
-#     ).json()
-    
-#     return {
-#         "company_id": company_id,
-#         "parent_company_id": response["parent_company"]["id"] if response["parent_company"] != None else None,
-#         "name": response["name"],
-#         "description": response["description"] if response["description"] != "" else None,
-#         "country": response["origin_country"],
-#         "head_quarters": response["headquarters"] if response["headquarters"] != "" else None
-#     }
-
-# @task(
-#     name="Retrieve Person Details",
-#     log_prints=True,
-#     retries=2,
-#     task_run_name="get-person-details-of-{person_id}"
-# )
-# def get_person_details(
-#     person_id: int,
-#     url: str="https://api.themoviedb.org/3/person"
-# ) -> Dict:
-#     response = requests.get(
-#         f"{url}/{person_id}",
-#         headers=headers
-#     ).json()
-
-#     return {
-#         "person_id": person_id,
-#         "imdb_id": response["imdb_id"],
-#         "name": response["name"],
-#         "gender": map_gender(response["gender"]),
-#         "biography": response["biography"] if response["biography"] != "" else None,
-#         "place_of_birth": response["place_of_birth"],
-#         "birthday": response["birthday"],
-#         "deathday": response["deathday"],
-#         "popularity": response["popularity"]
-#     }
+    column_names = ", ".join(data.keys())
+    column_values = ", ".join([f"%({key})s" for key in data.keys()])
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""INSERT INTO {table_name} (
+                    {column_names}
+                ) VALUES (
+                    {column_values}
+                )""",
+                data
+            )
+        connection.commit()
+    except Exception as e:
+        logger.error(f"Error inserting row: {e}")
+    finally:
+        connection.close()
