@@ -1,9 +1,10 @@
 import numpy as np
 from typing import List, Dict
 import requests
-from prefect import task, get_run_logger
 import os
+import asyncio
 from sqlalchemy.engine.base import Engine
+from prefect import task, get_run_logger
 
 from src.movie_etl.utils.etl import map_gender
 
@@ -18,7 +19,7 @@ headers = {
     retries=2,
     task_run_name="get-movie-ids-on-{start_date}--{end_date}"
 )
-def get_movie_ids(
+async def get_movie_ids(
     start_date: str="2020-01-01",
     end_date: str="2020-02-01",
     url: str="https://api.themoviedb.org/3/discover/movie",
@@ -58,6 +59,7 @@ def get_movie_ids(
         total_pages = response["total_pages"]
         
     # logger.info(f"Get {len(movie_ids)} movie_ids")
+    await asyncio.sleep(2)
     return movie_ids
 
 @task(
@@ -66,7 +68,7 @@ def get_movie_ids(
     retries=2,
     task_run_name="retrieve-data-id-{id}-from-{endpoint}"
 )
-def get_data_from_tmdb_api(
+async def get_data_from_tmdb_api(
     id: int,
     url: str,
     endpoint: str,
@@ -85,6 +87,7 @@ def get_data_from_tmdb_api(
             params=params
         ).json()
 
+    await asyncio.sleep(2)
     return response
 
 @task(
@@ -92,22 +95,22 @@ def get_data_from_tmdb_api(
     log_prints=True,
     task_run_name="clean-movie-details-of-{movie_id}"
 )
-def clean_movie_details(
+async def clean_movie_details(
     movie_id: int,
     movie_details: Dict
 ) -> Dict:
     casts = [
         {
             "person_id": cast["id"],
-            "character": cast["character"]
+            "character": cast["character"] if cast["character"] != "" else None
         } for cast in movie_details["credits"]["cast"]
     ]
 
     crews = [
         {
             "person_id": crew["id"],
-            "job": crew["job"],
-            "department": crew["department"]
+            "job": crew["job"] if crew["job"] != "" else None,
+            "department": crew["department"] if crew["department"] != "" else None
         } for crew in movie_details["credits"]["crew"]
     ]
 
@@ -122,6 +125,7 @@ def clean_movie_details(
         } for genre in movie_details["genres"]
     ]
 
+    await asyncio.sleep(2)
     return {
         "collection_id": movie_details["belongs_to_collection"]["id"] if movie_details["belongs_to_collection"] != None else None,
         "movie_id": movie_details["id"],
@@ -147,10 +151,11 @@ def clean_movie_details(
     log_prints=True,
     task_run_name="clean-collection-details-of-{collection_id}"
 )
-def clean_collection_details(
+async def clean_collection_details(
     collection_id: int,
     collection_details: Dict
 ) -> Dict:
+    await asyncio.sleep(2)
     return {
         "collection_id": collection_details["id"],
         "name": collection_details["name"],
@@ -162,10 +167,11 @@ def clean_collection_details(
     log_prints=True,
     task_run_name="clean-company-details-of-{company_id}"
 )
-def clean_company_details(
+async def clean_company_details(
     company_id: int,
     company_details: Dict
 ) -> Dict:
+    await asyncio.sleep(2)
     return {
         "company_id": company_details["id"],
         "parent_company_id": company_details["parent_company"]["id"] if company_details["parent_company"] != None else None,
@@ -180,10 +186,11 @@ def clean_company_details(
     log_prints=True,
     task_run_name="clean-person-details-of-{person_id}"
 )
-def clean_person_details(
+async def clean_person_details(
     person_id: int,
     person_details: Dict
 ) -> Dict:
+    await asyncio.sleep(2)
     return {
         "person_id": person_details["id"],
         "imdb_id": person_details["imdb_id"],
@@ -201,7 +208,7 @@ def clean_person_details(
     log_prints=True,
     task_run_name="load-data-id-{id}-to-db-{table_name}"
 )
-def load_data_to_db(
+async def load_data_to_db(
     table_name: str,
     id: int,
     data: Dict,
@@ -227,3 +234,5 @@ def load_data_to_db(
         logger.error(f"Error inserting row: {e}")
     finally:
         connection.close()
+
+    await asyncio.sleep(2)
