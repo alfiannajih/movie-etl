@@ -5,12 +5,20 @@ import os
 import asyncio
 from sqlalchemy.engine.base import Engine
 from prefect import task, get_run_logger
+from bs4 import BeautifulSoup
+from bs4.element import Tag
+import pandas as pd
+import re
 
 from src.movie_etl.utils.etl import map_gender
 
-headers = {
+tmdb_headers = {
     "accept": "application/json",
     "Authorization": f"Bearer {os.getenv("TMDB_API_KEY")}"
+}
+
+imdb_headers = {
+    'User-Agent': 'Mozilla/5.0'
 }
 
 @task(
@@ -48,7 +56,7 @@ async def get_movie_ids(
 
         response = requests.get(
             url,
-            headers=headers,
+            headers=tmdb_headers,
             params=params
         ).json()
 
@@ -77,18 +85,123 @@ async def get_data_from_tmdb_api(
     if id == None:
         response = requests.get(
             url,
-            headers=headers,
+            headers=tmdb_headers,
             params=params
         ).json()
     else:
         response = requests.get(
             f"{url}/{id}",
-            headers=headers,
+            headers=tmdb_headers,
             params=params
         ).json()
 
     await asyncio.sleep(2)
     return response
+
+@task(
+    name="Scrape Data from IMDB",
+    log_prints=True,
+    retries=2,
+    task_run_name="scrape-data-id-{imdb_id}-from-imdb"
+)
+async def scrape_data_from_imdb(
+    imdb_id: str,
+    url: str,
+    endpoint: str=""
+) -> BeautifulSoup:
+    page = requests.get(
+        f"{url}/{imdb_id}/{endpoint}",
+        headers=imdb_headers
+    ).content
+
+    await asyncio.sleep(2)
+    return BeautifulSoup(page, "html.parser")
+
+@task(
+    name="Clean IMDB Reviews",
+    log_prints=True,
+    retries=2,
+    task_run_name="clean-imdb-reviews-of-{movie_id}"
+)
+async def clean_imdb_reviews(
+    movie_id: str,
+    soup: BeautifulSoup,
+) -> List:
+    reviews = soup.find_all("div", class_="imdb-user-review")
+
+    cleaned_reviews = []
+
+    for review in reviews:
+        review_id = review["data-review-id"]
+        rating = review.find("div", class_="ipl-ratings-bar").text.replace("\n", "").split("/")[0]
+        review_title = review.find("a", class_="title").text.strip()
+        review_date = pd.to_datetime(review.find("span", class_="review-date").text).strftime("%Y-%m-%d")
+        spoiler = True if review.find("span", class_="spoiler-warning") != None else False
+        review_content = review.find("div", class_="text").text.strip()
+        helpfulness = review.find("div", class_="actions text-muted").text.strip().split("\n")[0]
+        helpful, total = [int(i) for i in re.findall(r'\d+', helpfulness)]
+        unhelpful = total - helpful
+
+        user_details =  review.find("span", class_="display-name-link")
+        user_id = user_details.a["href"].split("/")[2]
+
+        cleaned_reviews.append({
+            "review_id": review_id,
+            "user_id": user_id,
+            "movie_id": movie_id,
+            "rating": int(rating),
+            "review_title": review_title,
+            "review_date": review_date,
+            "spoiler": spoiler,
+            "review_content": review_content,
+            "helpful": helpful,
+            "unhelpful": unhelpful
+        })
+    await asyncio.sleep(2)
+    return cleaned_reviews
+
+@task(
+    name="Clean IMDB User Details",
+    log_prints=True,
+    retries=2,
+    task_run_name="clean-imdb-user-details-of-{imdb_user_id}"
+)
+async def clean_imdb_user_details(
+    imdb_user_id: str,
+    soup: BeautifulSoup
+) -> Dict:
+    user_details = soup.find("div", class_="header")
+
+    user_name = user_details.h1.text
+    date_joined = pd.to_datetime(user_details.find("div", class_="timestamp").text.split("since")[1].strip())
+    # user_badges = user_details.find("div", class_="badges").find_all("div", class_="badge-frame")
+
+    await asyncio.sleep(2)
+    return {
+        "user_id": imdb_user_id,
+        "user_name": user_name,
+        "date_joined": date_joined,
+        # "user_badges": user_badges
+    }
+
+# @task(
+#     name="Clean IMDB User Badges",
+#     log_prints=True,
+#     retries=2,
+#     task_run_name="clean-imdb-user-badges-of-{imdb_user_id}"
+# )
+# async def clean_imdb_user_badges(
+#     imdb_user_id: str,
+#     user_badge: Tag
+# ) -> Dict:
+#     badge_name = user_badge.find("div", class_="name").text
+#     badge_description = user_badge.find("div", class_="value").text
+
+#     await asyncio.sleep(2)
+#     return {
+#         "badge_name": badge_name,
+#         "badge_description": badge_description
+#     }
 
 @task(
     name="Clean Movie Details",

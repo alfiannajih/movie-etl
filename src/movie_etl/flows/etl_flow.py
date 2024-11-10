@@ -11,10 +11,13 @@ from src.movie_etl.utils.etl import is_primary_key_exist_in_table
 from src.movie_etl.tasks.etl_task import (
     get_movie_ids,
     get_data_from_tmdb_api,
+    scrape_data_from_imdb,
     clean_movie_details,
     clean_collection_details,
     clean_company_details,
     clean_person_details,
+    clean_imdb_reviews,
+    clean_imdb_user_details,
     load_data_to_db
 )
 
@@ -22,8 +25,9 @@ load_dotenv()
 
 engine = create_engine(os.getenv("DB_CONNECTION"))
 
-people_details_limit = asyncio.Semaphore(25)
+people_details_limit = asyncio.Semaphore(15)
 movie_limit = asyncio.Semaphore(5)
+review_limit = asyncio.Semaphore(25)
 
 async def process_people_with_semaphore(coro):
     async with people_details_limit:
@@ -31,6 +35,10 @@ async def process_people_with_semaphore(coro):
     
 async def process_movie_with_semaphore(coro):
     async with movie_limit:
+        return await coro
+    
+async def process_review_with_semaphore(coro):
+    async with review_limit:
         return await coro
 
 @flow(
@@ -208,6 +216,73 @@ async def movie_production_flow(
             engine=engine
         )
 
+@flow(
+    name="movie_reviews_flow",
+    log_prints=True,
+    retries=2,
+    flow_run_name="movie-reviews-flow-on-{movie_id}"
+)
+async def movie_reviews_flow(
+    imdb_movie_id: str,
+    movie_id: int,
+) -> Dict:
+    soup = await scrape_data_from_imdb(
+        imdb_movie_id,
+        "https://www.imdb.com/title",
+        "reviews/_ajax"
+    )
+
+    cleaned_reviews = await clean_imdb_reviews(movie_id, soup)
+
+    futures = [process_review_with_semaphore(imdb_user_reviews_flow(review["movie_id"], review)) for review in cleaned_reviews]
+    await asyncio.gather(*futures)
+
+@flow(
+    name="imdb_user_details_flow",
+    log_prints=True,
+    retries=2,
+    flow_run_name="imdb-user-details-flow-on-{user_id}"
+)
+async def imdb_user_details_flow(
+    user_id: str,
+):
+    soup = await scrape_data_from_imdb(
+        url="https://www.imdb.com/user",
+        imdb_id=user_id
+    )
+
+    user_details = await clean_imdb_user_details(user_id, soup)
+    await load_data_to_db(
+        table_name="imdb_users",
+        id=user_id,
+        data={k: user_details[k] for k in [
+            "user_id",
+            "user_name",
+            "date_joined"
+        ]},
+        engine=engine
+    )
+
+@flow(
+    name="imdb_user_reviews_flow",
+    log_prints=True,
+    retries=2,
+    flow_run_name="imdb-user-reviews-flow-on-{movie_id}"
+)
+async def imdb_user_reviews_flow(
+    movie_id: int,
+    review: dict
+):
+    if not is_primary_key_exist_in_table(review["user_id"], "user_id", "imdb_users", engine):
+        await imdb_user_details_flow(review["user_id"])
+    
+    await load_data_to_db(
+        table_name="imdb_movie_reviews",
+        id=review["review_id"],
+        data=review,
+        engine=engine
+    )
+
 async def single_movie_cast_flow(
     movie_id: int,
     cast: dict
@@ -300,23 +375,21 @@ async def movie_crew_flow(
 )
 async def single_movie_flow(movie_id: int):
     movie_details = await movie_details_flow(movie_id)
+    # reviews = await movie_reviews_flow(
+    #     movie_details["imdb_id"],
+    #     movie_id
+    # )
 
-    # await movie_genre_flow(movie_id, movie_details["genres"])
-
-    # await movie_language_flow(movie_id, movie_details["spoken_languages"])
-
-    # await movie_production_flow(movie_id, movie_details["production_companies"])
-
-    # await movie_cast_flow(movie_id, movie_details["casts"])
-
-    # await movie_crew_flow(movie_id, movie_details["crews"])
-    await asyncio.gather(
+    futures = [
         movie_genre_flow(movie_id, movie_details["genres"]),
         movie_language_flow(movie_id, movie_details["spoken_languages"]),
         movie_production_flow(movie_id, movie_details["production_companies"]),
         movie_cast_flow(movie_id, movie_details["casts"]),
-        movie_crew_flow(movie_id, movie_details["crews"])
-    )
+        movie_crew_flow(movie_id, movie_details["crews"]),
+        movie_reviews_flow(movie_details["imdb_id"], movie_id)
+    ]
+    # futures.extend([imdb_user_reviews_flow(review["user_id"], review) for review in reviews])
+    await asyncio.gather(*futures)
 
 @flow(
     name="Movies ETL Flow",

@@ -13,12 +13,14 @@ def map_gender(
     return gender_dict[gender_id]
 
 def is_primary_key_exist_in_table(
-    primary_key: int,
+    primary_key,
     primary_key_name: str,
     table_name: str,
     engine: Engine
 ):
     connection = engine.raw_connection()
+    if type(primary_key) == str:
+        primary_key = f"'{primary_key}'"
     with connection.cursor() as cursor:
         cursor.execute(
             f"SELECT {primary_key_name} FROM {table_name} WHERE {primary_key_name} = {primary_key}"
