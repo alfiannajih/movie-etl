@@ -53,37 +53,36 @@ CREATE TABLE "people" (
     "popularity" FLOAT(2)
 );
 
-CREATE TABLE "tv_series" (
-    "series_id" BIGINT PRIMARY KEY,
-    "title" VARCHAR(255),
-    "overview" TEXT,
-    "popularity" FLOAT(2),
-    "vote_average" FLOAT(2),
-    "vote_count" INTEGER
-);
+-- CREATE TABLE "tv_series" (
+--     "series_id" BIGINT PRIMARY KEY,
+--     "title" VARCHAR(255),
+--     "overview" TEXT,
+--     "popularity" FLOAT(2),
+--     "vote_average" FLOAT(2),
+--     "vote_count" INTEGER
+-- );
 
-CREATE TABLE "tv_seasons" (
-    "season_id" BIGINT PRIMARY KEY,
-    "series_id" BIGINT,
-    "season_number" INTEGER,
-    "air_date" DATE,
-    "overview" TEXT,
-    "vote_average" FLOAT(2)
-);
+-- CREATE TABLE "tv_seasons" (
+--     "season_id" BIGINT PRIMARY KEY,
+--     "series_id" BIGINT,
+--     "season_number" INTEGER,
+--     "air_date" DATE,
+--     "overview" TEXT,
+--     "vote_average" FLOAT(2)
+-- );
 
-CREATE TABLE "tv_episodes" (
-    "episode_id" BIGINT PRIMARY KEY,
-    "season_id" BIGINT,
-    "episode_number" INTEGER,
-    "title" VARCHAR(255),
-    "air_date" DATE,
-    "overview" TEXT,
-    "production_code" INTEGER,
-    "runtime" INTEGER,
-    "vote_average" FLOAT(2),
-    "vote_count" INTEGER
-
-);
+-- CREATE TABLE "tv_episodes" (
+--     "episode_id" BIGINT PRIMARY KEY,
+--     "season_id" BIGINT,
+--     "episode_number" INTEGER,
+--     "title" VARCHAR(255),
+--     "air_date" DATE,
+--     "overview" TEXT,
+--     "production_code" INTEGER,
+--     "runtime" INTEGER,
+--     "vote_average" FLOAT(2),
+--     "vote_count" INTEGER
+-- );
 
 CREATE TABLE "movie_production" (
     "movie_id" BIGINT,
@@ -113,33 +112,35 @@ CREATE TABLE "movie_crew" (
     "department" VARCHAR(255)
 );
 
-CREATE TABLE "series_production" (
-    "series_id" BIGINT,
-    "company_id" BIGINT
+CREATE TABLE "imdb_movie_reviews" (
+    "review_id" VARCHAR PRIMARY KEY,
+    "user_id" VARCHAR,
+    "movie_id" BIGINT,
+    "rating" INTEGER,
+    "review_title" VARCHAR(255),
+    "review_date" DATE,
+    "spoiler" BOOLEAN,
+    "review_content" TEXT,
+    "helpful" INTEGER,
+    "unhelpful" INTEGER
 );
 
-CREATE TABLE "series_language" (
-    "series_id" BIGINT,
-    "language_id" CHAR(2)
+CREATE TABLE "imdb_users" (
+    "user_id" VARCHAR PRIMARY KEY,
+    "user_name" VARCHAR(255),
+    "date_joined" DATE
 );
 
-CREATE TABLE "series_genre" (
-    "series_id" BIGINT,
-    "genre_id" INTEGER
-);
+-- CREATE TABLE "imdb_user_badges" (
+--     "user_id" VARCHAR,
+--     "badge_id" INTEGER,
+--     "description" VARCHAR(255)
+-- );
 
-CREATE TABLE "episode_cast" (
-    "episode_id" BIGINT,
-    "person_id" BIGINT,
-    "character" VARCHAR(255)
-);
-
-CREATE TABLE "episode_crew" (
-    "episode_id" BIGINT,
-    "person_id" BIGINT,
-    "job" VARCHAR(255),
-    "department" VARCHAR(255)
-);
+-- CREATE TABLE "imdb_badges" (
+--     "badge_id" SERIAL PRIMARY KEY,
+--     "badge_name" VARCHAR(255)
+-- );
 
 ALTER TABLE "movies" ADD CONSTRAINT "fk_movies_to_collections" FOREIGN KEY ("collection_id") REFERENCES "movie_collections" ("collection_id");
 
@@ -165,29 +166,13 @@ ALTER TABLE "movie_crew" ADD CONSTRAINT "fk_movie_crew_to_movies" FOREIGN KEY ("
 
 ALTER TABLE "movie_crew" ADD CONSTRAINT "fk_movie_crew_to_people" FOREIGN KEY ("person_id") REFERENCES "people" ("person_id");
 
-ALTER TABLE "series_production" ADD CONSTRAINT "fk_series_production_to_tv_series" FOREIGN KEY ("series_id") REFERENCES "tv_series" ("series_id");
+ALTER TABLE "imdb_movie_reviews" ADD CONSTRAINT "fk_imdb_movie_reviews_to_movies" FOREIGN KEY ("movie_id") REFERENCES "movies" ("movie_id");
 
-ALTER TABLE "series_production" ADD CONSTRAINT "fk_series_production_to_companies" FOREIGN KEY ("company_id") REFERENCES "companies" ("company_id");
+ALTER TABLE "imdb_movie_reviews" ADD CONSTRAINT "fk_imdb_movie_reviews_to_users" FOREIGN KEY ("user_id") REFERENCES "imdb_users" ("user_id");
 
-ALTER TABLE "series_language" ADD CONSTRAINT "fk_series_language_to_tv_series" FOREIGN KEY ("series_id") REFERENCES "tv_series" ("series_id");
+-- ALTER TABLE "imdb_user_badges" ADD CONSTRAINT "fk_user_badges_to_users" FOREIGN KEY ("user_id") REFERENCES "imdb_users" ("user_id");
 
-ALTER TABLE "series_language" ADD CONSTRAINT "fk_series_language_to_languages" FOREIGN KEY ("language_id") REFERENCES "languages" ("language_id");
-
-ALTER TABLE "series_genre" ADD CONSTRAINT "fk_series_genre_to_tv_series" FOREIGN KEY ("series_id") REFERENCES "tv_series" ("series_id");
-
-ALTER TABLE "series_genre" ADD CONSTRAINT "fk_series_genre_to_genres" FOREIGN KEY ("genre_id") REFERENCES "genres" ("genre_id");
-
-ALTER TABLE "tv_seasons" ADD CONSTRAINT "fk_tv_seasons_to_tv_series" FOREIGN KEY ("series_id") REFERENCES "tv_series" ("series_id");
-
-ALTER TABLE "tv_episodes" ADD CONSTRAINT "fk_tv_episodes_to_tv_seasons" FOREIGN KEY ("season_id") REFERENCES "tv_seasons" ("season_id");
-
-ALTER TABLE "episode_cast" ADD CONSTRAINT "fk_episode_cast_to_tv_episodes" FOREIGN KEY ("episode_id") REFERENCES "tv_episodes" ("episode_id");
-
-ALTER TABLE "episode_cast" ADD CONSTRAINT "fk_episode_cast_to_people" FOREIGN KEY ("person_id") REFERENCES "people" ("person_id");
-
-ALTER TABLE "episode_crew" ADD CONSTRAINT "fk_episode_crew_to_tv_episodes" FOREIGN KEY ("episode_id") REFERENCES "tv_episodes" ("episode_id");
-
-ALTER TABLE "episode_crew" ADD CONSTRAINT "fk_episode_crew_to_people" FOREIGN KEY ("person_id") REFERENCES "people" ("person_id");
+-- ALTER TABLE "imdb_user_badges" ADD CONSTRAINT "fk_user_badges_to_badges" FOREIGN KEY ("badge_id") REFERENCES "imdb_badges" ("badge_id");
 
 CREATE UNIQUE INDEX "movie_production_index" ON movie_production ("movie_id", "company_id");
 
@@ -199,15 +184,7 @@ CREATE UNIQUE INDEX "movie_cast_index" ON movie_cast ("movie_id", "person_id", "
 
 CREATE UNIQUE INDEX "movie_crew_index" ON movie_crew ("movie_id", "person_id", "job", "department");
 
-CREATE UNIQUE INDEX "series_production_index" ON series_production ("series_id", "company_id");
-
-CREATE UNIQUE INDEX "series_language_index" ON series_language ("series_id", "language_id");
-
-CREATE UNIQUE INDEX "series_genre_index" ON series_genre ("series_id", "genre_id");
-
-CREATE UNIQUE INDEX "episode_cast_index" ON episode_cast ("episode_id", "person_id", "character");
-
-CREATE UNIQUE INDEX "episode_crew_index" ON episode_crew ("episode_id", "person_id", "job", "department");
+-- CREATE UNIQUE INDEX "user_badges_index" ON user_badges ("user_id", "badge_id");
 
 INSERT INTO "languages"
 ("language_id", "language")
@@ -399,3 +376,65 @@ VALUES
 ('ti', 'Tigrinya'),
 ('tk', 'Turkmen'),
 ('he', 'Hebrew')
+
+-- CREATE TABLE "series_production" (
+--     "series_id" BIGINT,
+--     "company_id" BIGINT
+-- );
+
+-- CREATE TABLE "series_language" (
+--     "series_id" BIGINT,
+--     "language_id" CHAR(2)
+-- );
+
+-- CREATE TABLE "series_genre" (
+--     "series_id" BIGINT,
+--     "genre_id" INTEGER
+-- );
+
+-- CREATE TABLE "episode_cast" (
+--     "episode_id" BIGINT,
+--     "person_id" BIGINT,
+--     "character" VARCHAR(255)
+-- );
+
+-- CREATE TABLE "episode_crew" (
+--     "episode_id" BIGINT,
+--     "person_id" BIGINT,
+--     "job" VARCHAR(255),
+--     "department" VARCHAR(255)
+-- );
+
+-- ALTER TABLE "series_production" ADD CONSTRAINT "fk_series_production_to_tv_series" FOREIGN KEY ("series_id") REFERENCES "tv_series" ("series_id");
+
+-- ALTER TABLE "series_production" ADD CONSTRAINT "fk_series_production_to_companies" FOREIGN KEY ("company_id") REFERENCES "companies" ("company_id");
+
+-- ALTER TABLE "series_language" ADD CONSTRAINT "fk_series_language_to_tv_series" FOREIGN KEY ("series_id") REFERENCES "tv_series" ("series_id");
+
+-- ALTER TABLE "series_language" ADD CONSTRAINT "fk_series_language_to_languages" FOREIGN KEY ("language_id") REFERENCES "languages" ("language_id");
+
+-- ALTER TABLE "series_genre" ADD CONSTRAINT "fk_series_genre_to_tv_series" FOREIGN KEY ("series_id") REFERENCES "tv_series" ("series_id");
+
+-- ALTER TABLE "series_genre" ADD CONSTRAINT "fk_series_genre_to_genres" FOREIGN KEY ("genre_id") REFERENCES "genres" ("genre_id");
+
+-- ALTER TABLE "tv_seasons" ADD CONSTRAINT "fk_tv_seasons_to_tv_series" FOREIGN KEY ("series_id") REFERENCES "tv_series" ("series_id");
+
+-- ALTER TABLE "tv_episodes" ADD CONSTRAINT "fk_tv_episodes_to_tv_seasons" FOREIGN KEY ("season_id") REFERENCES "tv_seasons" ("season_id");
+
+-- ALTER TABLE "episode_cast" ADD CONSTRAINT "fk_episode_cast_to_tv_episodes" FOREIGN KEY ("episode_id") REFERENCES "tv_episodes" ("episode_id");
+
+-- ALTER TABLE "episode_cast" ADD CONSTRAINT "fk_episode_cast_to_people" FOREIGN KEY ("person_id") REFERENCES "people" ("person_id");
+
+-- ALTER TABLE "episode_crew" ADD CONSTRAINT "fk_episode_crew_to_tv_episodes" FOREIGN KEY ("episode_id") REFERENCES "tv_episodes" ("episode_id");
+
+-- ALTER TABLE "episode_crew" ADD CONSTRAINT "fk_episode_crew_to_people" FOREIGN KEY ("person_id") REFERENCES "people" ("person_id");
+
+-- CREATE UNIQUE INDEX "series_production_index" ON series_production ("series_id", "company_id");
+
+-- CREATE UNIQUE INDEX "series_language_index" ON series_language ("series_id", "language_id");
+
+-- CREATE UNIQUE INDEX "series_genre_index" ON series_genre ("series_id", "genre_id");
+
+-- CREATE UNIQUE INDEX "episode_cast_index" ON episode_cast ("episode_id", "person_id", "character");
+
+-- CREATE UNIQUE INDEX "episode_crew_index" ON episode_crew ("episode_id", "person_id", "job", "department");
