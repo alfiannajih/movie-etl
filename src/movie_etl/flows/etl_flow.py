@@ -27,7 +27,7 @@ engine = create_engine(os.getenv("DB_CONNECTION"))
 
 people_details_limit = asyncio.Semaphore(15)
 movie_limit = asyncio.Semaphore(5)
-review_limit = asyncio.Semaphore(25)
+review_limit = asyncio.Semaphore(10)
 
 async def process_people_with_semaphore(coro):
     async with people_details_limit:
@@ -233,7 +233,7 @@ async def movie_reviews_flow(
     )
 
     cleaned_reviews = await clean_imdb_reviews(movie_id, soup)
-
+    
     futures = [process_review_with_semaphore(imdb_user_reviews_flow(review["movie_id"], review)) for review in cleaned_reviews]
     await asyncio.gather(*futures)
 

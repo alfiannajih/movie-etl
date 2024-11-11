@@ -102,6 +102,7 @@ async def get_data_from_tmdb_api(
     name="Scrape Data from IMDB",
     log_prints=True,
     retries=2,
+    retry_delay_seconds=5,
     task_run_name="scrape-data-id-{imdb_id}-from-imdb"
 )
 async def scrape_data_from_imdb(
@@ -109,13 +110,21 @@ async def scrape_data_from_imdb(
     url: str,
     endpoint: str=""
 ) -> BeautifulSoup:
-    page = requests.get(
+    logger = get_run_logger()
+
+    response = requests.get(
         f"{url}/{imdb_id}/{endpoint}",
         headers=imdb_headers
-    ).content
+    )
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        logger.error("Error fetching IMDB data: " + str(e), exc_info=True)
+        raise e
 
     await asyncio.sleep(2)
-    return BeautifulSoup(page, "html.parser")
+    return BeautifulSoup(response.content, "html.parser")
 
 @task(
     name="Clean IMDB Reviews",
@@ -127,13 +136,19 @@ async def clean_imdb_reviews(
     movie_id: str,
     soup: BeautifulSoup,
 ) -> List:
+    logger = get_run_logger()
     reviews = soup.find_all("div", class_="imdb-user-review")
 
     cleaned_reviews = []
-
+    
     for review in reviews:
         review_id = review["data-review-id"]
-        rating = review.find("div", class_="ipl-ratings-bar").text.replace("\n", "").split("/")[0]
+        try:
+            rating = int(review.find("div", class_="ipl-ratings-bar").text.replace("\n", "").split("/")[0])
+        except:
+            logger.warning(f"Review {review_id} has no rating")
+            rating = None
+        
         review_title = review.find("a", class_="title").text.strip()
         review_date = pd.to_datetime(review.find("span", class_="review-date").text).strftime("%Y-%m-%d")
         spoiler = True if review.find("span", class_="spoiler-warning") != None else False
@@ -149,7 +164,7 @@ async def clean_imdb_reviews(
             "review_id": review_id,
             "user_id": user_id,
             "movie_id": movie_id,
-            "rating": int(rating),
+            "rating": rating,
             "review_title": review_title,
             "review_date": review_date,
             "spoiler": spoiler,
