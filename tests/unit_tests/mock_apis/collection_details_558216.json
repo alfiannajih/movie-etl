@@ -1,0 +1,71 @@
+{
+    "id": 558216,
+    "name": "Venom Collection",
+    "overview": "A frustrated journalist named Eddie Brock and a carnivorous black symbiote unite to become the monstrous antihero Venom and battle both good and evil alike. Based on the Marvel Comics character.",
+    "poster_path": "/4bXIKqdZIjR8wKgZaGDaLhLj4yF.jpg",
+    "backdrop_path": "/vq340s8DxA5Q209FT8PHA6CXYOx.jpg",
+    "parts": [
+      {
+        "backdrop_path": "/vIgyYkXkg6NC2whRbYjBD7eb3Er.jpg",
+        "id": 580489,
+        "title": "Venom: Let There Be Carnage",
+        "original_title": "Venom: Let There Be Carnage",
+        "overview": "After finding a host body in investigative reporter Eddie Brock, the alien symbiote must face a new enemy, Carnage, the alter ego of serial killer Cletus Kasady.",
+        "poster_path": "/1MJNcPZy46hIy2CmSqOeru0yr5C.jpg",
+        "media_type": "movie",
+        "adult": false,
+        "original_language": "en",
+        "genre_ids": [
+          878,
+          28,
+          12
+        ],
+        "popularity": 741.63,
+        "release_date": "2021-09-30",
+        "video": false,
+        "vote_average": 6.799,
+        "vote_count": 10158
+      },
+      {
+        "backdrop_path": "/VuukZLgaCrho2Ar8Scl9HtV3yD.jpg",
+        "id": 335983,
+        "title": "Venom",
+        "original_title": "Venom",
+        "overview": "Investigative journalist Eddie Brock attempts a comeback following a scandal, but accidentally becomes the host of Venom, a violent, super powerful alien symbiote. Soon, he must rely on his newfound powers to protect the world from a shadowy organization looking for a symbiote of their own.",
+        "poster_path": "/2uNW4WbgBXL25BAbXGLnLqX71Sw.jpg",
+        "media_type": "movie",
+        "adult": false,
+        "original_language": "en",
+        "genre_ids": [
+          878,
+          28
+        ],
+        "popularity": 824.7,
+        "release_date": "2018-09-28",
+        "video": false,
+        "vote_average": 6.835,
+        "vote_count": 15934
+      },
+      {
+        "backdrop_path": "/3V4kLQg0kSqPLctI5ziYWabAZYF.jpg",
+        "id": 912649,
+        "title": "Venom: The Last Dance",
+        "original_title": "Venom: The Last Dance",
+        "overview": "Eddie and Venom are on the run. Hunted by both of their worlds and with the net closing in, the duo are forced into a devastating decision that will bring the curtains down on Venom and Eddie's last dance.",
+        "poster_path": "/aosm8NMQ3UyoBVpSxyimorCQykC.jpg",
+        "media_type": "movie",
+        "adult": false,
+        "original_language": "en",
+        "genre_ids": [
+          878,
+          28,
+          12
+        ],
+        "popularity": 3685.151,
+        "release_date": "2024-10-22",
+        "video": false,
+        "vote_average": 6.403,
+        "vote_count": 675
+      }
+    ]
+  }

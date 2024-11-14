@@ -1,0 +1,387 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "adult": false,
+      "backdrop_path": "/6OnoMgGFuZ921eV8v8yEyXoag19.jpg",
+      "genre_ids": [
+        28,
+        53
+      ],
+      "id": 1211957,
+      "original_language": "en",
+      "original_title": "The Painter",
+      "overview": "An ex-CIA operative is thrown back into a dangerous world when a mysterious woman from his past resurfaces. Now exposed and targeted by a relentless killer and a rogue black ops program, he must rely on skills he thought he left behind in a high-stakes game of survival.",
+      "popularity": 40.553,
+      "poster_path": "/UZ0ydgbXtnrq8xZCI5lHVXVcH9.jpg",
+      "release_date": "2024-01-05",
+      "title": "The Painter",
+      "video": false,
+      "vote_average": 6.23,
+      "vote_count": 113
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/aZ8dBIvpDFp9cp23MfBiY5mWfuy.jpg",
+      "genre_ids": [
+        27
+      ],
+      "id": 1072342,
+      "original_language": "en",
+      "original_title": "Night Swim",
+      "overview": "Forced into early retirement by a degenerative illness, former baseball player Ray Waller moves into a new house with his wife and two children. He hopes that the backyard swimming pool will be fun for the kids and provide physical therapy for himself. However, a dark secret from the home's past soon unleashes a malevolent force that drags the family into the depths of inescapable terror.",
+      "popularity": 36.121,
+      "poster_path": "/gSkfBGdxdialBMM7P02V4hcI6Ij.jpg",
+      "release_date": "2024-01-03",
+      "title": "Night Swim",
+      "video": false,
+      "vote_average": 5.6,
+      "vote_count": 598
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/vzO729sITNJ1jB6Y9AJpIhlbvb2.jpg",
+      "genre_ids": [
+        99,
+        80
+      ],
+      "id": 1213997,
+      "original_language": "en",
+      "original_title": "Bitconned",
+      "overview": "In this true-crime documentary, three guys exploit the freewheeling cryptocurrency market to scam millions from investors and bankroll lavish lifestyles.",
+      "popularity": 24.107,
+      "poster_path": "/dDHpIF5mcAkeiv3r8KlMkksr7b9.jpg",
+      "release_date": "2024-01-01",
+      "title": "Bitconned",
+      "video": false,
+      "vote_average": 6.295,
+      "vote_count": 44
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/r5JPFrwZyFwPQyLu4oXhm5h5tg1.jpg",
+      "genre_ids": [
+        27
+      ],
+      "id": 1136347,
+      "original_language": "en",
+      "original_title": "The Bad Nun 3",
+      "overview": "When a traumatized young woman in a grief counselling group suddenly dies, a trio of friends from the group decide to find out what really happened.",
+      "popularity": 27.146,
+      "poster_path": "/sj41kN0tVEQm8GUFDXC6Kic1iwV.jpg",
+      "release_date": "2024-01-05",
+      "title": "The Bad Nun 3",
+      "video": false,
+      "vote_average": 6.2,
+      "vote_count": 54
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/jsp420JTZ7EK5LhpwzunE1Pu43d.jpg",
+      "genre_ids": [
+        35,
+        53
+      ],
+      "id": 1072876,
+      "original_language": "en",
+      "original_title": "Self Reliance",
+      "overview": "When a man is offered a million dollars to play a game in which hunters try to kill him, he thinks he has found the perfect loophole: they can only attack when he’s alone. His only problem is that none of his friends or family believe the game is real.",
+      "popularity": 17.492,
+      "poster_path": "/hlSWmmuuLeV1p3YcIkU59khEHLY.jpg",
+      "release_date": "2024-01-03",
+      "title": "Self Reliance",
+      "video": false,
+      "vote_average": 5.976,
+      "vote_count": 169
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/1aL5xmJJKxur5GJ1glJSOLK3xnG.jpg",
+      "genre_ids": [
+        18,
+        36
+      ],
+      "id": 972433,
+      "original_language": "en",
+      "original_title": "Race for Glory: Audi vs Lancia",
+      "overview": "Inspired by true events that occurred during the fierce rivalry between Germany (Audi) and Italy (Lancia) at the 1983 Rally World Championships.",
+      "popularity": 15.73,
+      "poster_path": "/ovoybG8mCn6nQ6i5WoC8DdR08c2.jpg",
+      "release_date": "2024-01-05",
+      "title": "Race for Glory: Audi vs Lancia",
+      "video": false,
+      "vote_average": 6.1,
+      "vote_count": 151
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/zicVG7dd0hM5wYYKSqCGxXNuEyk.jpg",
+      "genre_ids": [
+        28,
+        80,
+        53,
+        27
+      ],
+      "id": 1223050,
+      "original_language": "en",
+      "original_title": "Roadkill",
+      "overview": "Vengeance rides the open road when a young woman, traveling alone, encounters a renegade drifter and ends up in a fight for her life.",
+      "popularity": 7.08,
+      "poster_path": "/txDIiggyiFNbwa6TrZvBRfw6E54.jpg",
+      "release_date": "2024-01-05",
+      "title": "Roadkill",
+      "video": false,
+      "vote_average": 5,
+      "vote_count": 17
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/kKvM0bP6FWHyly9NVab18Zphsci.jpg",
+      "genre_ids": [
+        99,
+        35,
+        10770
+      ],
+      "id": 1214490,
+      "original_language": "en",
+      "original_title": "M*A*S*H: The Comedy That Changed Television",
+      "overview": "Join the individuals who made M*A*S*H as they celebrate one of the most beloved, enduringly popular, often quoted and influential comedies ever created.",
+      "popularity": 9.414,
+      "poster_path": "/eMdfYYcO7XLwfJ0LhpQQCtA9gvM.jpg",
+      "release_date": "2024-01-01",
+      "title": "M*A*S*H: The Comedy That Changed Television",
+      "video": false,
+      "vote_average": 9,
+      "vote_count": 5
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/iENuTaWvI2e7KEuKnTxxBhZwF3x.jpg",
+      "genre_ids": [
+        53,
+        80,
+        18
+      ],
+      "id": 836972,
+      "original_language": "en",
+      "original_title": "He Went That Way",
+      "overview": "Set in 1964, a three-day journey along Route 66 begins when Bobby Falls, a 19-year-old serial killer, hitches a ride with Jim Goodwin, a celebrity animal handler travelling with his precious cargo: his TV chimpanzee, Spanky.",
+      "popularity": 7.09,
+      "poster_path": "/ii1DVzyj9uJOF9qBrnHCT6nAxUw.jpg",
+      "release_date": "2024-01-05",
+      "title": "He Went That Way",
+      "video": false,
+      "vote_average": 5.6,
+      "vote_count": 37
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/vG25UlRgxKVYxfQsSVFwBFaHZB9.jpg",
+      "genre_ids": [
+        10770,
+        10749
+      ],
+      "id": 1212662,
+      "original_language": "en",
+      "original_title": "A Scottish Love Scheme",
+      "overview": "Lily travels to Scotland with her mother and reconnects with Logan, a childhood family friend. Unbeknownst to Lily and Logan, their meddling mothers have come up with a plan to set them up.",
+      "popularity": 8.424,
+      "poster_path": "/mU27y1agaBDnDWgc3ypm1b2qNC0.jpg",
+      "release_date": "2024-01-04",
+      "title": "A Scottish Love Scheme",
+      "video": false,
+      "vote_average": 7.7,
+      "vote_count": 11
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/qTNBCN5XQhFy2lgH0XTMg87AI4N.jpg",
+      "genre_ids": [
+        53,
+        18
+      ],
+      "id": 912600,
+      "original_language": "en",
+      "original_title": "Some Other Woman",
+      "overview": "Eve was promised a few months on a tropical island for her husband’s work... but years later, unable to build the family they wanted, she has given up on any of her own desires. As island fever intensifies, reality unravels around Eve as a strange woman begins taking over her life piece by piece.",
+      "popularity": 5.821,
+      "poster_path": "/kiXZm4lEuE5DbvUssNFi10X3J4J.jpg",
+      "release_date": "2024-01-05",
+      "title": "Some Other Woman",
+      "video": false,
+      "vote_average": 3.9,
+      "vote_count": 6
+    },
+    {
+      "adult": false,
+      "backdrop_path": null,
+      "genre_ids": [
+        18
+      ],
+      "id": 1154655,
+      "original_language": "en",
+      "original_title": "1",
+      "overview": ".",
+      "popularity": 5.016,
+      "poster_path": "/8J6ajNPoqi02Hxg0E8AO9EUcCa8.jpg",
+      "release_date": "2024-01-01",
+      "title": "1",
+      "video": false,
+      "vote_average": 5.3,
+      "vote_count": 87
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/itP5PA3ARZw50vvGGsZTWEFKsMN.jpg",
+      "genre_ids": [
+        10770,
+        35,
+        10749
+      ],
+      "id": 1212661,
+      "original_language": "en",
+      "original_title": "Love on the Right Course",
+      "overview": "Thirty year old, Whitney Williams, a professional golfer, suffers a series of setbacks that lead her to question her future in the sport. After an extended losing streak, she returns home to Budapest, Hungary, to reevaluate her future in the sport. There she meets a golf pro who helps her rediscover the joy of the game. In the process, she finds love.",
+      "popularity": 7.192,
+      "poster_path": "/iHTGbieCY8R9CORdA4s2EalrbDQ.jpg",
+      "release_date": "2024-01-06",
+      "title": "Love on the Right Course",
+      "video": false,
+      "vote_average": 7.6,
+      "vote_count": 10
+    },
+    {
+      "adult": false,
+      "backdrop_path": null,
+      "genre_ids": [
+        28,
+        80,
+        53
+      ],
+      "id": 1203498,
+      "original_language": "en",
+      "original_title": "Fyre Rises",
+      "overview": "Debt-ridden pacifist Richard Fyre is propositioned to return to his abandoned mercenary ways by flamboyant zealot Priest to eliminate his international competition in exchange for a clean slate. Standing at a crossroads, he must overcome his fears of becoming the monster he once was to the rightful man he needs to be now before his indecision has dire repercussions for his family.",
+      "popularity": 3.433,
+      "poster_path": "/wqT2ihQHiN8awbWf4MFhOk7ZnJL.jpg",
+      "release_date": "2024-01-01",
+      "title": "Fyre Rises",
+      "video": false,
+      "vote_average": 4.75,
+      "vote_count": 4
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/iw8KkrRICr4sczPS8cZI9P0sjoc.jpg",
+      "genre_ids": [
+        35,
+        27
+      ],
+      "id": 941883,
+      "original_language": "en",
+      "original_title": "Evil Bong 888: Infinity High",
+      "overview": "When he's finally given a chance to go legit by opening a restaurant, Rabbit can't stop himself from sliding back to his old ways. With EeBee as his Master Chef, weed is definitely on the menu and this high-end joint is the toke of the town. Staffed with tons of familiar faces and fan favorite buds, will Rabbit end on a high note? Or will he be chopped by the cops in a kitchen nightmare that goes up in smoke.",
+      "popularity": 5.124,
+      "poster_path": "/rWo4tiVgMSsUAdw641cOr9QBcJZ.jpg",
+      "release_date": "2024-01-04",
+      "title": "Evil Bong 888: Infinity High",
+      "video": false,
+      "vote_average": 6,
+      "vote_count": 4
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/nGajM8vQbwy6hXSKkv06bp1e8ps.jpg",
+      "genre_ids": [
+        99
+      ],
+      "id": 1225332,
+      "original_language": "en",
+      "original_title": "Mr Bates vs The Post Office: The Real Story",
+      "overview": "When Post Office subpostmasters up and down the country started to experience big shortfalls in their accounts, Post Office assumed they were stealing the money and prosecuted them. Hundred were given criminal convictions and many were sent to prison. Lives, marriages, reputations – all ruined. The shortfalls were in fact, a result of errors in the Post Office’s own IT system, known as Horizon. It was something the Post Office had always denied. For over twenty years, former subpostmaster Alan Bates has fought tirelessly for justice for all the subpostmasters who were so poorly treated by the brand they had loved. This is his story.",
+      "popularity": 3.94,
+      "poster_path": "/kh0YMPdn3fkPunbE55kMDKpca2b.jpg",
+      "release_date": "2024-01-04",
+      "title": "Mr Bates vs The Post Office: The Real Story",
+      "video": false,
+      "vote_average": 7.9,
+      "vote_count": 8
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/sSIfTH4wVkeNICFO9m1ffZWK8HZ.jpg",
+      "genre_ids": [
+        53,
+        10770
+      ],
+      "id": 1227163,
+      "original_language": "en",
+      "original_title": "Dying for Fame",
+      "overview": "Internet tabloid reporter Anna is assigned to write a profile about popular influencer Juliet. During Anna's time with Juliet, she discovers that many of Juliet's fans aren't real.",
+      "popularity": 2.99,
+      "poster_path": "/kTHVbFXcU8ZfjMGht67mDgHXaJy.jpg",
+      "release_date": "2024-01-04",
+      "title": "Dying for Fame",
+      "video": false,
+      "vote_average": 4.3,
+      "vote_count": 3
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/iTAS4WvZm5cxXcpADgIAp2w0XxK.jpg",
+      "genre_ids": [
+        10770,
+        53
+      ],
+      "id": 1036156,
+      "original_language": "en",
+      "original_title": "Secrets in the Marriage",
+      "overview": "Framed for murder by her cheating husband, a newlywed must find a way to absolve herself of a crime she didn't commit while exposing her spouse before it's too late.",
+      "popularity": 3.35,
+      "poster_path": "/njRMJMXbdodNPt3kvKGVJ0W85yA.jpg",
+      "release_date": "2024-01-04",
+      "title": "Secrets in the Marriage",
+      "video": false,
+      "vote_average": 6.3,
+      "vote_count": 3
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/2pm3nTEureZQXMyGo8BCrJpft6w.jpg",
+      "genre_ids": [
+        99
+      ],
+      "id": 1026468,
+      "original_language": "en",
+      "original_title": "Scala!!!",
+      "overview": "This feature-length big screen documentary tells the riotous inside story of the infamous sex, drugs and rock 'n' roll repertory cinema which inspired a generation during Britain's turbulent Thatcher years.",
+      "popularity": 2.266,
+      "poster_path": "/8V24gqtjHR8ZJz0iTWWr07mXgce.jpg",
+      "release_date": "2024-01-05",
+      "title": "Scala!!!",
+      "video": false,
+      "vote_average": 8.6,
+      "vote_count": 5
+    },
+    {
+      "adult": false,
+      "backdrop_path": "/ftm0sOaioqiEpmhq6fcoj4zJ8VD.jpg",
+      "genre_ids": [
+        99
+      ],
+      "id": 1225686,
+      "original_language": "en",
+      "original_title": "I Am Andrew Tate",
+      "overview": "The explosive story of Tate's rise, arrest, and fall. Where did the world's most Googled man spring from? Is he a dangerous icon for toxic masculinity or a misunderstood internet star?",
+      "popularity": 1.524,
+      "poster_path": "/g7akKOuep6QaaFEKahvUoaoAm31.jpg",
+      "release_date": "2024-01-07",
+      "title": "I Am Andrew Tate",
+      "video": false,
+      "vote_average": 6.3,
+      "vote_count": 3
+    }
+  ],
+  "total_pages": 2,
+  "total_results": 22
+}

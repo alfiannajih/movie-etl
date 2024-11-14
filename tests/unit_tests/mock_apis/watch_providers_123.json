@@ -1,0 +1,771 @@
+{
+    "id": 123,
+    "results": {
+      "AO": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=AO",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 0
+          }
+        ]
+      },
+      "AT": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=AT",
+        "buy": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 4
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 7
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 12
+          }
+        ]
+      },
+      "AU": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=AU",
+        "buy": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 10
+          },
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 12
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 13
+          },
+          {
+            "logo_path": "/pTnn5JwWr4p3pG8H6VrpiQo7Vs0.jpg",
+            "provider_id": 192,
+            "provider_name": "YouTube",
+            "display_priority": 21
+          }
+        ]
+      },
+      "AZ": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=AZ",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 1
+          }
+        ]
+      },
+      "BE": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=BE",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 7
+          },
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 49
+          }
+        ]
+      },
+      "BF": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=BF",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 0
+          }
+        ]
+      },
+      "BY": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=BY",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 1
+          }
+        ]
+      },
+      "BZ": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=BZ",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 1
+          }
+        ]
+      },
+      "CA": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=CA",
+        "flatrate": [
+          {
+            "logo_path": "/ewOptMVIYcOadMGGJz8DJueH2bH.jpg",
+            "provider_id": 230,
+            "provider_name": "Crave",
+            "display_priority": 4
+          },
+          {
+            "logo_path": "/csPQMbeJWY7bjwWruZjtc27xf2l.jpg",
+            "provider_id": 305,
+            "provider_name": "Crave Starz",
+            "display_priority": 5
+          },
+          {
+            "logo_path": "/esiLBRzDUwodjfN8gA4qj7l3ZF7.jpg",
+            "provider_id": 1794,
+            "provider_name": "Starz Amazon Channel",
+            "display_priority": 108
+          }
+        ],
+        "buy": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 6
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 8
+          },
+          {
+            "logo_path": "/d1mUAhpJpxy0YMjwVOZ4lxAAbeT.jpg",
+            "provider_id": 140,
+            "provider_name": "Cineplex",
+            "display_priority": 19
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 23
+          },
+          {
+            "logo_path": "/pTnn5JwWr4p3pG8H6VrpiQo7Vs0.jpg",
+            "provider_id": 192,
+            "provider_name": "YouTube",
+            "display_priority": 37
+          },
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 59
+          }
+        ],
+        "rent": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 6
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 8
+          },
+          {
+            "logo_path": "/d1mUAhpJpxy0YMjwVOZ4lxAAbeT.jpg",
+            "provider_id": 140,
+            "provider_name": "Cineplex",
+            "display_priority": 19
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 23
+          },
+          {
+            "logo_path": "/pTnn5JwWr4p3pG8H6VrpiQo7Vs0.jpg",
+            "provider_id": 192,
+            "provider_name": "YouTube",
+            "display_priority": 37
+          },
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 59
+          }
+        ]
+      },
+      "CH": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=CH",
+        "buy": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 4
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 5
+          },
+          {
+            "logo_path": "/82hFfWsPYtyskBrnkL8Y36vHcVf.jpg",
+            "provider_id": 133,
+            "provider_name": "Videobuster",
+            "display_priority": 8
+          }
+        ]
+      },
+      "DE": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=DE",
+        "buy": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 4
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 12
+          },
+          {
+            "logo_path": "/pTnn5JwWr4p3pG8H6VrpiQo7Vs0.jpg",
+            "provider_id": 192,
+            "provider_name": "YouTube",
+            "display_priority": 15
+          },
+          {
+            "logo_path": "/lrEigPPAhggq02q53uM8vdWAIUX.jpg",
+            "provider_id": 178,
+            "provider_name": "MagentaTV",
+            "display_priority": 24
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 32
+          },
+          {
+            "logo_path": "/dKh2TJ9lTWV0UIcDQGMnMyQ8AIN.jpg",
+            "provider_id": 1993,
+            "provider_name": "Videoload",
+            "display_priority": 147
+          }
+        ]
+      },
+      "DK": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=DK",
+        "buy": [
+          {
+            "logo_path": "/bnoTnLzz2MAhK3Yc6P9KXe5drIz.jpg",
+            "provider_id": 76,
+            "provider_name": "Viaplay",
+            "display_priority": 4
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 8
+          },
+          {
+            "logo_path": "/sNmIwrniZZORvNJOmEuWGhwBJNf.jpg",
+            "provider_id": 426,
+            "provider_name": "SF Anytime",
+            "display_priority": 17
+          }
+        ]
+      },
+      "ES": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=ES",
+        "buy": [
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 36
+          }
+        ]
+      },
+      "FI": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=FI",
+        "buy": [
+          {
+            "logo_path": "/bnoTnLzz2MAhK3Yc6P9KXe5drIz.jpg",
+            "provider_id": 76,
+            "provider_name": "Viaplay",
+            "display_priority": 4
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 10
+          },
+          {
+            "logo_path": "/sNmIwrniZZORvNJOmEuWGhwBJNf.jpg",
+            "provider_id": 426,
+            "provider_name": "SF Anytime",
+            "display_priority": 16
+          }
+        ]
+      },
+      "FR": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=FR",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 7
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 14
+          },
+          {
+            "logo_path": "/pTnn5JwWr4p3pG8H6VrpiQo7Vs0.jpg",
+            "provider_id": 192,
+            "provider_name": "YouTube",
+            "display_priority": 15
+          },
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 40
+          }
+        ]
+      },
+      "GB": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=GB",
+        "buy": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 4
+          },
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 7
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 15
+          },
+          {
+            "logo_path": "/6AKbY2ayaEuH4zKg2prqoVQ9iaY.jpg",
+            "provider_id": 130,
+            "provider_name": "Sky Store",
+            "display_priority": 17
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 18
+          },
+          {
+            "logo_path": "/pTnn5JwWr4p3pG8H6VrpiQo7Vs0.jpg",
+            "provider_id": 192,
+            "provider_name": "YouTube",
+            "display_priority": 22
+          }
+        ]
+      },
+      "HR": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=HR",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 3
+          }
+        ]
+      },
+      "IE": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=IE",
+        "buy": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 4
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 7
+          },
+          {
+            "logo_path": "/6AKbY2ayaEuH4zKg2prqoVQ9iaY.jpg",
+            "provider_id": 130,
+            "provider_name": "Sky Store",
+            "display_priority": 9
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 14
+          }
+        ]
+      },
+      "IN": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=IN",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 9
+          },
+          {
+            "logo_path": "/pTnn5JwWr4p3pG8H6VrpiQo7Vs0.jpg",
+            "provider_id": 192,
+            "provider_name": "YouTube",
+            "display_priority": 12
+          }
+        ]
+      },
+      "IT": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=IT",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 7
+          }
+        ]
+      },
+      "LU": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=LU",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 1
+          }
+        ]
+      },
+      "ML": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=ML",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 1
+          }
+        ]
+      },
+      "MX": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=MX",
+        "buy": [
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 7
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 13
+          },
+          {
+            "logo_path": "/21M5CpiOYGOhHj2sVPXqwt6yeTO.jpg",
+            "provider_id": 167,
+            "provider_name": "Claro video",
+            "display_priority": 24
+          }
+        ]
+      },
+      "NL": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=NL",
+        "rent": [
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 14
+          }
+        ],
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 13
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 14
+          },
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 37
+          }
+        ]
+      },
+      "NO": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=NO",
+        "buy": [
+          {
+            "logo_path": "/bnoTnLzz2MAhK3Yc6P9KXe5drIz.jpg",
+            "provider_id": 76,
+            "provider_name": "Viaplay",
+            "display_priority": 4
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 9
+          },
+          {
+            "logo_path": "/sNmIwrniZZORvNJOmEuWGhwBJNf.jpg",
+            "provider_id": 426,
+            "provider_name": "SF Anytime",
+            "display_priority": 17
+          }
+        ]
+      },
+      "NZ": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=NZ",
+        "buy": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 4
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 6
+          }
+        ]
+      },
+      "PG": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=PG",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 0
+          }
+        ]
+      },
+      "PH": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=PH",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 5
+          }
+        ]
+      },
+      "PL": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=PL",
+        "buy": [
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 30
+          }
+        ]
+      },
+      "SE": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=SE",
+        "buy": [
+          {
+            "logo_path": "/bnoTnLzz2MAhK3Yc6P9KXe5drIz.jpg",
+            "provider_id": 76,
+            "provider_name": "Viaplay",
+            "display_priority": 6
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 8
+          },
+          {
+            "logo_path": "/sNmIwrniZZORvNJOmEuWGhwBJNf.jpg",
+            "provider_id": 426,
+            "provider_name": "SF Anytime",
+            "display_priority": 17
+          }
+        ]
+      },
+      "TZ": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=TZ",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 18
+          }
+        ]
+      },
+      "UA": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=UA",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 3
+          }
+        ]
+      },
+      "US": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=US",
+        "rent": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 5
+          },
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 15
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 16
+          },
+          {
+            "logo_path": "/pTnn5JwWr4p3pG8H6VrpiQo7Vs0.jpg",
+            "provider_id": 192,
+            "provider_name": "YouTube",
+            "display_priority": 17
+          },
+          {
+            "logo_path": "/i6lRmkKmJ23oOZ6IyjnOYLKxA9J.jpg",
+            "provider_id": 7,
+            "provider_name": "Fandango At Home",
+            "display_priority": 37
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 46
+          }
+        ],
+        "buy": [
+          {
+            "logo_path": "/9ghgSC0MA082EL6HLCW3GalykFD.jpg",
+            "provider_id": 2,
+            "provider_name": "Apple TV",
+            "display_priority": 5
+          },
+          {
+            "logo_path": "/seGSXajazLMCKGB5hnRCidtjay1.jpg",
+            "provider_id": 10,
+            "provider_name": "Amazon Video",
+            "display_priority": 15
+          },
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 16
+          },
+          {
+            "logo_path": "/pTnn5JwWr4p3pG8H6VrpiQo7Vs0.jpg",
+            "provider_id": 192,
+            "provider_name": "YouTube",
+            "display_priority": 17
+          },
+          {
+            "logo_path": "/i6lRmkKmJ23oOZ6IyjnOYLKxA9J.jpg",
+            "provider_id": 7,
+            "provider_name": "Fandango At Home",
+            "display_priority": 37
+          },
+          {
+            "logo_path": "/5vfrJQgNe9UnHVgVNAwZTy0Jo9o.jpg",
+            "provider_id": 68,
+            "provider_name": "Microsoft Store",
+            "display_priority": 46
+          }
+        ]
+      },
+      "ZW": {
+        "link": "https://www.themoviedb.org/movie/123-the-lord-of-the-rings/watch?locale=ZW",
+        "buy": [
+          {
+            "logo_path": "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg",
+            "provider_id": 3,
+            "provider_name": "Google Play Movies",
+            "display_priority": 1
+          }
+        ]
+      }
+    }
+  }
