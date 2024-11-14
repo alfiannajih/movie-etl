@@ -2,10 +2,11 @@ import requests
 from dotenv import load_dotenv
 import os
 from typing import List, Dict
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, URL
 import asyncio
 from prefect import task, get_run_logger, flow
 from prefect.context import FlowRunContext
+
 
 from src.movie_etl.utils.etl import is_primary_key_exist_in_table
 from src.movie_etl.tasks.etl_task import (
@@ -16,18 +17,28 @@ from src.movie_etl.tasks.etl_task import (
     clean_collection_details,
     clean_company_details,
     clean_person_details,
-    clean_imdb_reviews,
-    clean_imdb_user_details,
-    load_data_to_db
+    clean_watch_providers,
+    # clean_imdb_reviews,
+    # clean_imdb_user_details,
+    load_single_row_to_db,
+    load_multi_row_to_db
 )
 
 load_dotenv()
 
-engine = create_engine(os.getenv("DB_CONNECTION"))
+url_object = URL.create(
+    "postgresql+psycopg2",
+    username=os.getenv("POSTGRES_USER"),
+    password=os.getenv("POSTGRES_PASSWORD"),
+    host=os.getenv("POSTGRES_HOST"),
+    database=os.getenv("POSTGRES_DB")
+)
+
+engine = create_engine(url_object)
 
 people_details_limit = asyncio.Semaphore(15)
-movie_limit = asyncio.Semaphore(5)
-review_limit = asyncio.Semaphore(10)
+movie_limit = asyncio.Semaphore(1)
+# review_limit = asyncio.Semaphore(10)
 
 async def process_people_with_semaphore(coro):
     async with people_details_limit:
@@ -37,9 +48,9 @@ async def process_movie_with_semaphore(coro):
     async with movie_limit:
         return await coro
     
-async def process_review_with_semaphore(coro):
-    async with review_limit:
-        return await coro
+# async def process_review_with_semaphore(coro):
+#     async with review_limit:
+#         return await coro
 
 @flow(
     name="movie_details_flow",
@@ -56,7 +67,7 @@ async def movie_details_flow(
         url="https://api.themoviedb.org/3/movie",
         endpoint="movie",
         params={
-            "append_to_response": "credits"
+            "append_to_response": "credits,watch/providers"
         }
     )
     movie_details = await clean_movie_details(movie_details["id"], movie_details)
@@ -67,18 +78,15 @@ async def movie_details_flow(
         await movie_collection_flow(movie_details["collection_id"])
     
     # load_movie_details_to_db(movie_id, movie_details)
-    await load_data_to_db(
+    await load_single_row_to_db(
         table_name="movies",
         data={k: movie_details[k] for k in [
             "movie_id",
             "collection_id",
-            "imdb_id",
             "title",
             "overview",
             "release_date",
             "popularity",
-            "vote_average",
-            "vote_count",
             "budget",
             "revenue",
             "runtime"
@@ -106,7 +114,7 @@ async def movie_collection_flow(
         )
         collection_details = await clean_collection_details(collection_id, collection_details)
         # load_collection_details_to_db(collection_id, collection_details)
-        await load_data_to_db(
+        await load_single_row_to_db(
             table_name="movie_collections",
             data=collection_details,
             id=collection_id,
@@ -126,18 +134,18 @@ async def movie_genre_flow(
     logger = get_run_logger()
     
     for genre in movie_genres:
-        if not is_primary_key_exist_in_table(genre["genre_id"], "genre_id", "genres", engine):
-            logger.info("New genre ID found: " + str(genre["genre_id"]))
-            # load_genre_to_db(genre["id"], genre)
-            await load_data_to_db(
-                table_name="genres",
-                data=genre,
-                id=genre["genre_id"],
-                engine=engine
-            )
+        # if not is_primary_key_exist_in_table(genre["genre_id"], "genre_id", "genres", engine):
+        #     logger.info("New genre ID found: " + str(genre["genre_id"]))
+        #     # load_genre_to_db(genre["id"], genre)
+        #     await load_data_to_db(
+        #         table_name="genres",
+        #         data=genre,
+        #         id=genre["genre_id"],
+        #         engine=engine
+        #     )
 
         # load_movie_genre_to_db(movie_id, {"genre_id": genre["id"], "movie_id": movie_id})
-        await load_data_to_db(
+        await load_single_row_to_db(
             table_name="movie_genre",
             data={"genre_id": genre["genre_id"], "movie_id": movie_id},
             id=movie_id,
@@ -156,7 +164,7 @@ async def movie_language_flow(
 ):
     for language_id in movie_languages:
         # load_language_to_db(movie_id, {"language_id": language_id, "movie_id": movie_id})
-        await load_data_to_db(
+        await load_single_row_to_db(
             table_name="movie_language",
             data={"language_id": language_id, "movie_id": movie_id},
             id=movie_id,
@@ -201,7 +209,7 @@ async def movie_production_flow(
 
             for i in range(len(companies_to_add)-1, -1, -1):
                 # load_company_to_db(companies_to_add[i]["company_id"], companies_to_add[i])
-                await load_data_to_db(
+                await load_single_row_to_db(
                     table_name="companies",
                     data=companies_to_add[i],
                     id=companies_to_add[i]["company_id"],
@@ -209,80 +217,139 @@ async def movie_production_flow(
                 )
             
         # load_movie_production_to_db(movie_id, {"company_id": company_id, "movie_id": movie_id})
-        await load_data_to_db(
+        await load_single_row_to_db(
             table_name="movie_production",
             data={"company_id": company_id, "movie_id": movie_id},
             id=movie_id,
             engine=engine
         )
 
-@flow(
-    name="movie_reviews_flow",
-    log_prints=True,
-    retries=2,
-    flow_run_name="movie-reviews-flow-on-{movie_id}"
-)
-async def movie_reviews_flow(
-    imdb_movie_id: str,
-    movie_id: int,
-) -> Dict:
-    soup = await scrape_data_from_imdb(
-        imdb_movie_id,
-        "https://www.imdb.com/title",
-        "reviews/_ajax"
-    )
+# @flow(
+#     name="movie_reviews_flow",
+#     log_prints=True,
+#     retries=2,
+#     flow_run_name="movie-reviews-flow-on-{movie_id}"
+# )
+# async def movie_reviews_flow(
+#     imdb_movie_id: str,
+#     movie_id: int,
+# ) -> Dict:
+#     soup = await scrape_data_from_imdb(
+#         imdb_movie_id,
+#         "https://www.imdb.com/title",
+#         "reviews/_ajax"
+#     )
 
-    cleaned_reviews = await clean_imdb_reviews(movie_id, soup)
+#     cleaned_reviews = await clean_imdb_reviews(movie_id, soup)
     
-    futures = [process_review_with_semaphore(imdb_user_reviews_flow(review["movie_id"], review)) for review in cleaned_reviews]
-    await asyncio.gather(*futures)
+#     futures = [process_review_with_semaphore(imdb_user_reviews_flow(review["movie_id"], review)) for review in cleaned_reviews]
+#     await asyncio.gather(*futures)
 
-@flow(
-    name="imdb_user_details_flow",
-    log_prints=True,
-    retries=2,
-    flow_run_name="imdb-user-details-flow-on-{user_id}"
-)
-async def imdb_user_details_flow(
-    user_id: str,
-):
-    soup = await scrape_data_from_imdb(
-        url="https://www.imdb.com/user",
-        imdb_id=user_id
-    )
+# @flow(
+#     name="imdb_user_details_flow",
+#     log_prints=True,
+#     retries=2,
+#     flow_run_name="imdb-user-details-flow-on-{user_id}"
+# )
+# async def imdb_user_details_flow(
+#     user_id: str,
+# ):
+#     soup = await scrape_data_from_imdb(
+#         url="https://www.imdb.com/user",
+#         imdb_id=user_id
+#     )
 
-    user_details = await clean_imdb_user_details(user_id, soup)
-    await load_data_to_db(
-        table_name="imdb_users",
-        id=user_id,
-        data={k: user_details[k] for k in [
-            "user_id",
-            "user_name",
-            "date_joined"
-        ]},
-        engine=engine
-    )
+#     user_details = await clean_imdb_user_details(user_id, soup)
+#     await load_data_to_db(
+#         table_name="imdb_users",
+#         id=user_id,
+#         data={k: user_details[k] for k in [
+#             "user_id",
+#             "user_name",
+#             "date_joined"
+#         ]},
+#         engine=engine
+#     )
 
-@flow(
-    name="imdb_user_reviews_flow",
-    log_prints=True,
-    retries=2,
-    flow_run_name="imdb-user-reviews-flow-on-{movie_id}"
-)
-async def imdb_user_reviews_flow(
-    movie_id: int,
-    review: dict
-):
-    if not is_primary_key_exist_in_table(review["user_id"], "user_id", "imdb_users", engine):
-        await imdb_user_details_flow(review["user_id"])
+# @flow(
+#     name="imdb_user_reviews_flow",
+#     log_prints=True,
+#     retries=2,
+#     flow_run_name="imdb-user-reviews-flow-on-{movie_id}"
+# )
+# async def imdb_user_reviews_flow(
+#     movie_id: int,
+#     review: dict
+# ):
+#     if not is_primary_key_exist_in_table(review["user_id"], "user_id", "imdb_users", engine):
+#         await imdb_user_details_flow(review["user_id"])
     
-    await load_data_to_db(
-        table_name="imdb_movie_reviews",
-        id=review["review_id"],
-        data=review,
-        engine=engine
-    )
+#     await load_data_to_db(
+#         table_name="imdb_movie_reviews",
+#         id=review["review_id"],
+#         data=review,
+#         engine=engine
+#     )
 
+@flow(
+    name="movie_production_country_flow",
+    log_prints=True,
+    retries=1,
+    flow_run_name="movie-production-country-flow-on-{movie_id}"
+)
+async def movie_production_country_flow(
+    movie_id: int,
+    production_countries: List
+):
+    for country in production_countries:
+        await load_single_row_to_db(
+            table_name="production_country",
+            id=country["iso_3166_1"],
+            data={"movie_id": movie_id, "country_id": country["iso_3166_1"]},
+            engine=engine
+        )
+
+@flow(
+    name="movie_provider_flow",
+    log_prints=True,
+    flow_run_name="movie-provider-flow-on-{movie_id}"
+)
+async def movie_provder_flow(
+    movie_id: int,
+    movie_providers: Dict
+):
+    logger = get_run_logger()
+    # add_to_db = []
+
+    # for country, details in movie_providers.items():
+    #     if details.get("buy") != None:
+    #         add_to_db.extend([(movie_id, country, b["provider_id"], "buy") for b in details.get("buy")])
+
+    #     if details.get("rent") != None:
+    #         add_to_db.extend([(movie_id, country, b["provider_id"], "rent") for b in details.get("rent")])
+
+    #     if details.get("flatrate") != None:
+    #         add_to_db.extend([(movie_id, country, b["provider_id"], "flatrate") for b in details.get("flatrate")])
+    add_to_db = clean_watch_providers(movie_id, movie_providers)
+    
+    if len(add_to_db) > 0:
+        await load_multi_row_to_db(
+            table_name="movie_provider",
+            id=movie_id,
+            columns=["movie_id", "country_id", "provider_id", "type"],
+            data=add_to_db,
+            engine=engine
+        )
+    else:
+        logger.warning("Watch providers doesn't exists")
+
+
+@flow(
+    name="single_movie_cast_flow",
+    log_prints=True,
+    retries=2,
+    flow_run_name="single-movie-cast-flow-on-{movie_id}"
+)
 async def single_movie_cast_flow(
     movie_id: int,
     cast: dict
@@ -296,7 +363,7 @@ async def single_movie_cast_flow(
         person_details = await clean_person_details(person_details["id"], person_details)
 
         # load_person_to_db(cast["person_id"], person_details)
-        await load_data_to_db(
+        await load_single_row_to_db(
             table_name="people",
             data=person_details,
             id=person_details["person_id"],
@@ -304,7 +371,7 @@ async def single_movie_cast_flow(
         )
     
     # load_movie_cast_to_db(movie_id, cast | {"movie_id": movie_id})
-    await load_data_to_db(
+    await load_single_row_to_db(
         table_name="movie_cast",
         data=cast | {"movie_id": movie_id},
         id=movie_id,
@@ -325,6 +392,12 @@ async def movie_cast_flow(
     futures = [process_people_with_semaphore(single_movie_cast_flow(movie_id, cast)) for cast in movie_casts]
     await asyncio.gather(*futures)
 
+@flow(
+    name="single_movie_crew_flow",
+    log_prints=True,
+    retries=2,
+    flow_run_name="single-movie-crew-flow-on-{movie_id}"
+)
 async def single_movie_crew_flow(
     movie_id: int,
     crew: dict
@@ -338,7 +411,7 @@ async def single_movie_crew_flow(
         person_details = await clean_person_details(person_details["id"], person_details)
 
         # load_person_to_db(crew["person_id"], person_details)
-        await load_data_to_db(
+        await load_single_row_to_db(
             table_name="people",
             data=person_details,
             id=person_details["person_id"],
@@ -346,7 +419,7 @@ async def single_movie_crew_flow(
         )
 
     # load_movie_crew_to_db(movie_id, crew | {"movie_id": movie_id})
-    await load_data_to_db(
+    await load_single_row_to_db(
         table_name="movie_crew",
         data=crew | {"movie_id": movie_id},
         id=movie_id,
@@ -384,9 +457,11 @@ async def single_movie_flow(movie_id: int):
         movie_genre_flow(movie_id, movie_details["genres"]),
         movie_language_flow(movie_id, movie_details["spoken_languages"]),
         movie_production_flow(movie_id, movie_details["production_companies"]),
+        movie_production_country_flow(movie_id, movie_details["country"]),
         movie_cast_flow(movie_id, movie_details["casts"]),
         movie_crew_flow(movie_id, movie_details["crews"]),
-        movie_reviews_flow(movie_details["imdb_id"], movie_id)
+        movie_provder_flow(movie_id, movie_details["watch_providers"])
+        # movie_reviews_flow(movie_details["imdb_id"], movie_id)
     ]
     # futures.extend([imdb_user_reviews_flow(review["user_id"], review) for review in reviews])
     await asyncio.gather(*futures)
@@ -406,15 +481,6 @@ async def movies_flow(
     logger.info("Start movies ETL flow")
     movie_ids = await get_movie_ids(start_date=start_date, end_date=end_date, vote_count_minimum=vote_count_minimum)
     logger.info("Got " + str(len(movie_ids)) + " movie_ids")
-
-    # for movie_id in movie_ids:
-    #     logger.info("Start processing movie_id: " + str(movie_id))
-
-    #     if is_primary_key_exist_in_table(movie_id, "movie_id", "movies", engine):
-    #         logger.warning("Movie details already exist")
-    #         continue
-
-    #     single_movie_flow(movie_id)
     
     task_runner_type = type(FlowRunContext.get().task_runner)
     futures = []

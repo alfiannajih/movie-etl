@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import requests
 import os
 import asyncio
@@ -98,106 +98,106 @@ async def get_data_from_tmdb_api(
     await asyncio.sleep(2)
     return response
 
-@task(
-    name="Scrape Data from IMDB",
-    log_prints=True,
-    retries=2,
-    retry_delay_seconds=5,
-    task_run_name="scrape-data-id-{imdb_id}-from-imdb"
-)
-async def scrape_data_from_imdb(
-    imdb_id: str,
-    url: str,
-    endpoint: str=""
-) -> BeautifulSoup:
-    logger = get_run_logger()
+# @task(
+#     name="Scrape Data from IMDB",
+#     log_prints=True,
+#     retries=2,
+#     retry_delay_seconds=5,
+#     task_run_name="scrape-data-id-{imdb_id}-from-imdb"
+# )
+# async def scrape_data_from_imdb(
+#     imdb_id: str,
+#     url: str,
+#     endpoint: str=""
+# ) -> BeautifulSoup:
+#     logger = get_run_logger()
 
-    response = requests.get(
-        f"{url}/{imdb_id}/{endpoint}",
-        headers=imdb_headers
-    )
+#     response = requests.get(
+#         f"{url}/{imdb_id}/{endpoint}",
+#         headers=imdb_headers
+#     )
 
-    try:
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        logger.error("Error fetching IMDB data: " + str(e), exc_info=True)
-        raise e
+#     try:
+#         response.raise_for_status()
+#     except requests.exceptions.HTTPError as e:
+#         logger.error("Error fetching IMDB data: " + str(e), exc_info=True)
+#         raise e
 
-    await asyncio.sleep(2)
-    return BeautifulSoup(response.content, "html.parser")
+#     await asyncio.sleep(2)
+#     return BeautifulSoup(response.content, "html.parser")
 
-@task(
-    name="Clean IMDB Reviews",
-    log_prints=True,
-    retries=2,
-    task_run_name="clean-imdb-reviews-of-{movie_id}"
-)
-async def clean_imdb_reviews(
-    movie_id: str,
-    soup: BeautifulSoup,
-) -> List:
-    logger = get_run_logger()
-    reviews = soup.find_all("div", class_="imdb-user-review")
+# @task(
+#     name="Clean IMDB Reviews",
+#     log_prints=True,
+#     retries=2,
+#     task_run_name="clean-imdb-reviews-of-{movie_id}"
+# )
+# async def clean_imdb_reviews(
+#     movie_id: str,
+#     soup: BeautifulSoup,
+# ) -> List:
+#     logger = get_run_logger()
+#     reviews = soup.find_all("div", class_="imdb-user-review")
 
-    cleaned_reviews = []
+#     cleaned_reviews = []
     
-    for review in reviews:
-        review_id = review["data-review-id"]
-        try:
-            rating = int(review.find("div", class_="ipl-ratings-bar").text.replace("\n", "").split("/")[0])
-        except:
-            logger.warning(f"Review {review_id} has no rating")
-            rating = None
+#     for review in reviews:
+#         review_id = review["data-review-id"]
+#         try:
+#             rating = int(review.find("div", class_="ipl-ratings-bar").text.replace("\n", "").split("/")[0])
+#         except:
+#             logger.warning(f"Review {review_id} has no rating")
+#             rating = None
         
-        review_title = review.find("a", class_="title").text.strip()
-        review_date = pd.to_datetime(review.find("span", class_="review-date").text).strftime("%Y-%m-%d")
-        spoiler = True if review.find("span", class_="spoiler-warning") != None else False
-        review_content = review.find("div", class_="text").text.strip()
-        helpfulness = review.find("div", class_="actions text-muted").text.strip().split("\n")[0]
-        helpful, total = [int(i) for i in re.findall(r'\d+', helpfulness)]
-        unhelpful = total - helpful
+#         review_title = review.find("a", class_="title").text.strip()
+#         review_date = pd.to_datetime(review.find("span", class_="review-date").text).strftime("%Y-%m-%d")
+#         spoiler = True if review.find("span", class_="spoiler-warning") != None else False
+#         review_content = review.find("div", class_="text").text.strip()
+#         helpfulness = review.find("div", class_="actions text-muted").text.strip().split("\n")[0]
+#         helpful, total = [int(i) for i in re.findall(r'\d+', helpfulness)]
+#         unhelpful = total - helpful
 
-        user_details =  review.find("span", class_="display-name-link")
-        user_id = user_details.a["href"].split("/")[2]
+#         user_details =  review.find("span", class_="display-name-link")
+#         user_id = user_details.a["href"].split("/")[2]
 
-        cleaned_reviews.append({
-            "review_id": review_id,
-            "user_id": user_id,
-            "movie_id": movie_id,
-            "rating": rating,
-            "review_title": review_title,
-            "review_date": review_date,
-            "spoiler": spoiler,
-            "review_content": review_content,
-            "helpful": helpful,
-            "unhelpful": unhelpful
-        })
-    await asyncio.sleep(2)
-    return cleaned_reviews
+#         cleaned_reviews.append({
+#             "review_id": review_id,
+#             "user_id": user_id,
+#             "movie_id": movie_id,
+#             "rating": rating,
+#             "review_title": review_title,
+#             "review_date": review_date,
+#             "spoiler": spoiler,
+#             "review_content": review_content,
+#             "helpful": helpful,
+#             "unhelpful": unhelpful
+#         })
+#     await asyncio.sleep(2)
+#     return cleaned_reviews
 
-@task(
-    name="Clean IMDB User Details",
-    log_prints=True,
-    retries=2,
-    task_run_name="clean-imdb-user-details-of-{imdb_user_id}"
-)
-async def clean_imdb_user_details(
-    imdb_user_id: str,
-    soup: BeautifulSoup
-) -> Dict:
-    user_details = soup.find("div", class_="header")
+# @task(
+#     name="Clean IMDB User Details",
+#     log_prints=True,
+#     retries=2,
+#     task_run_name="clean-imdb-user-details-of-{imdb_user_id}"
+# )
+# async def clean_imdb_user_details(
+#     imdb_user_id: str,
+#     soup: BeautifulSoup
+# ) -> Dict:
+#     user_details = soup.find("div", class_="header")
 
-    user_name = user_details.h1.text
-    date_joined = pd.to_datetime(user_details.find("div", class_="timestamp").text.split("since")[1].strip())
-    # user_badges = user_details.find("div", class_="badges").find_all("div", class_="badge-frame")
+#     user_name = user_details.h1.text
+#     date_joined = pd.to_datetime(user_details.find("div", class_="timestamp").text.split("since")[1].strip())
+#     # user_badges = user_details.find("div", class_="badges").find_all("div", class_="badge-frame")
 
-    await asyncio.sleep(2)
-    return {
-        "user_id": imdb_user_id,
-        "user_name": user_name,
-        "date_joined": date_joined,
-        # "user_badges": user_badges
-    }
+#     await asyncio.sleep(2)
+#     return {
+#         "user_id": imdb_user_id,
+#         "user_name": user_name,
+#         "date_joined": date_joined,
+#         # "user_badges": user_badges
+#     }
 
 # @task(
 #     name="Clean IMDB User Badges",
@@ -246,33 +246,54 @@ async def clean_movie_details(
 
     spoken_languages = [language["iso_639_1"] for language in movie_details["spoken_languages"]]
 
-    genres = [
-        {
-            "genre_id": genre["id"],
-            "genre": genre["name"]
-        } for genre in movie_details["genres"]
-    ]
+    production_countries = [country["iso_3166_1"] for country in movie_details["production_countries"]]
+
+    genres = [genre["id"] for genre in movie_details["genres"]]
+
+    watch_providers = movie_details["watch/providers"]
 
     await asyncio.sleep(2)
     return {
         "collection_id": movie_details["belongs_to_collection"]["id"] if movie_details["belongs_to_collection"] != None else None,
         "movie_id": movie_details["id"],
-        "imdb_id": movie_details["imdb_id"],
         "title": movie_details["title"],
         "overview": movie_details["overview"] if movie_details["overview"] != "" else None,
         "release_date": movie_details["release_date"],
         "popularity": movie_details["popularity"] if movie_details["popularity"] != 0 else None,
-        "vote_average": movie_details["vote_average"] if movie_details["vote_average"] != 0 else None,
-        "vote_count": movie_details["vote_count"] if movie_details["vote_count"] != 0 else None,
         "budget": movie_details["budget"] if movie_details["budget"] != 0 else None,
         "revenue": movie_details["revenue"] if movie_details["revenue"] != 0 else None,
         "runtime": movie_details["runtime"] if movie_details["runtime"] != 0 else None,
+        "production_countries": production_countries,
         "genres": genres,
         "casts": casts,
         "crews": crews,
         "production_companies": production_companies,
-        "spoken_languages": spoken_languages
+        "spoken_languages": spoken_languages,
+        "watch_providers": watch_providers
     }
+
+# @task(
+#     name="Clean Watch Provider Details",
+#     log_prints=True,
+#     task_run_name="clean-watch-provider-details-of-{movie_id}"
+# )
+# async def clean_watch_provider_details(
+#     movie_id: int,
+#     watch_providers: Dict
+# ) -> List[Dict]:
+#     clean_providers = []
+
+#     for country_id, details in watch_providers.items():
+#         buy = [
+#             country_id, {"provider_id": detail["provider_id"] for detail in details["buy"]}
+#         ]
+#         sell = [
+#             country_id, {"provider_id": detail["provider_id"] for detail in details["buy"]}
+#         ]
+#         buy = [
+#             country_id, {"provider_id": detail["provider_id"] for detail in details["buy"]}
+#         ]
+        
 
 @task(
     name="Clean Collection Details",
@@ -305,7 +326,7 @@ async def clean_company_details(
         "parent_company_id": company_details["parent_company"]["id"] if company_details["parent_company"] != None else None,
         "name": company_details["name"],
         "description": company_details["description"] if company_details["description"] != "" else None,
-        "country": company_details["origin_country"] if company_details["origin_country"] != "" else None,
+        "country_id": company_details["origin_country"] if company_details["origin_country"] != "" else None,
         "head_quarters": company_details["headquarters"] if company_details["headquarters"] != "" else None
     }
 
@@ -321,7 +342,6 @@ async def clean_person_details(
     await asyncio.sleep(2)
     return {
         "person_id": person_details["id"],
-        "imdb_id": person_details["imdb_id"],
         "name": person_details["name"],
         "gender": map_gender(person_details["gender"]),
         "biography": person_details["biography"] if person_details["biography"] != "" else None,
@@ -332,11 +352,34 @@ async def clean_person_details(
     }
 
 @task(
-    name="Load Data to DB",
+    name="Clean Watch Providers",
+    log_prints=True,
+    task_run_name="clean-watch-providers-of-{movie_id}"
+)
+async def clean_watch_providers(
+    movie_id: int,
+    watch_providers: Dict
+) -> List:
+    movie_providers = []
+    for country, details in watch_providers["results"].items():
+        if details.get("buy") != None:
+            movie_providers.extend([(movie_id, country, b["provider_id"], "buy") for b in details.get("buy")])
+
+        if details.get("rent") != None:
+            movie_providers.extend([(movie_id, country, b["provider_id"], "rent") for b in details.get("rent")])
+
+        if details.get("flatrate") != None:
+            movie_providers.extend([(movie_id, country, b["provider_id"], "flatrate") for b in details.get("flatrate")])
+    
+    await asyncio.sleep(2)
+    return movie_providers
+
+@task(
+    name="Load Single Row to DB",
     log_prints=True,
     task_run_name="load-data-id-{id}-to-db-{table_name}"
 )
-async def load_data_to_db(
+async def load_single_row_to_db(
     table_name: str,
     id: int,
     data: Dict,
@@ -356,6 +399,37 @@ async def load_data_to_db(
                     {column_values}
                 )""",
                 data
+            )
+        connection.commit()
+    except Exception as e:
+        logger.error(f"Error inserting row: {e}")
+    finally:
+        connection.close()
+
+    await asyncio.sleep(2)
+
+@task(
+    name="Load Multi Row to DB",
+    log_prints=True,
+    task_run_name="load-data-multi-row-to-db-{table_name}"
+)
+async def load_multi_row_to_db(
+    table_name: str,
+    id: int,
+    columns: List,
+    data: List,
+    engine: Engine
+):
+    logger = get_run_logger()
+    connection = engine.raw_connection()
+    
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""INSERT INTO {table_name}
+                ({", ".join(columns)})
+                VALUES
+                {str(data)[1:-1]}"""
             )
         connection.commit()
     except Exception as e:
