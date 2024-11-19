@@ -1,4 +1,7 @@
 from sqlalchemy.engine.base import Engine
+import re
+import ast
+from bs4 import BeautifulSoup
 
 gender_dict = {
     0: "Not specified",
@@ -30,3 +33,30 @@ def is_primary_key_exist_in_table(
             return True
         else:
             return False
+        
+def extract_metacritic_data(
+    reviews_soup: BeautifulSoup
+):
+    review_score = reviews_soup.find("div", class_="c-siteReviewScore").text
+
+    review_sentiments = reviews_soup.find("div", class_="c-reviewsStats")
+
+    positive_sentiments, neutral_sentiments, negative_sentiments = review_sentiments.find_all("div")
+
+    num_positive = int(re.search(r"\d+(?= (Reviews|Ratings|Review|Rating))", positive_sentiments.text).group())
+    num_neutral = int(re.search(r"\d+(?= (Reviews|Ratings|Review|Rating))", neutral_sentiments.text).group())
+    num_negative = int(re.search(r"\d+(?= (Reviews|Ratings|Review|Rating))", negative_sentiments.text).group())
+
+    num_reviews = num_positive + num_neutral + num_negative
+
+    percent_positive = int(re.search(r"\d+(?=%)", positive_sentiments.text).group())
+    percent_neutral = int(re.search(r"\d+(?=%)", neutral_sentiments.text).group())
+    percent_negative = int(re.search(r"\d+(?=%)", negative_sentiments.text).group())
+
+    return {
+        "review_score": int(float(review_score*10)) if "." in review_score else int(float(review_score)),
+        "num_reviews": num_reviews,
+        "percent_positive": percent_positive,
+        "percent_neutral": percent_neutral,
+        "percent_negative": percent_negative
+    }

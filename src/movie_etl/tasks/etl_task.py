@@ -4,6 +4,7 @@ import requests
 import os
 import asyncio
 from sqlalchemy.engine.base import Engine
+from movie_etl.utils.etl import extract_metacritic_data
 from prefect import task, get_run_logger
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -17,7 +18,7 @@ tmdb_headers = {
     "Authorization": f"Bearer {os.getenv("TMDB_API_KEY")}"
 }
 
-imdb_headers = {
+headers = {
     'User-Agent': 'Mozilla/5.0'
 }
 
@@ -74,12 +75,12 @@ async def get_movie_ids(
     name="Retrieve Data from TMDB API",
     log_prints=True,
     retries=2,
-    task_run_name="retrieve-data-id-{id}-from-{endpoint}"
+    task_run_name="retrieve-tmdb-data-id-{id}-from-{endpoint_name}"
 )
 async def get_data_from_tmdb_api(
     id: int,
     url: str,
-    endpoint: str,
+    endpoint_name: str,
     params: Dict=None
 ) -> Dict:
     if id == None:
@@ -97,6 +98,41 @@ async def get_data_from_tmdb_api(
 
     await asyncio.sleep(2)
     return response
+
+@task(
+    name="Scrape Data from HTML Content",
+    log_prints=True,
+    retries=3,
+    retry_delay_seconds=3,
+    task_run_name="scrape-html-content-{id}-from-{source}"
+)
+async def scrape_html_content(
+    id: str,
+    url: str,
+    source: str,
+    suffix: str=None
+) -> BeautifulSoup:
+    # logger = get_run_logger()
+
+    if suffix != None:
+        response = requests.get(
+            f"{url}/{id}/{suffix}",
+            headers=headers
+        )
+    else:
+        response = requests.get(
+            f"{url}/{id}",
+            headers=headers
+        )
+
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        # logger.error(f"Error scraping data from {source}: {e}", exc_info=True)
+        raise e
+
+    await asyncio.sleep(2)
+    return BeautifulSoup(response.content, "html.parser")
 
 # @task(
 #     name="Scrape Data from IMDB",
@@ -263,6 +299,7 @@ async def clean_movie_details(
         "budget": movie_details["budget"] if movie_details["budget"] != 0 else None,
         "revenue": movie_details["revenue"] if movie_details["revenue"] != 0 else None,
         "runtime": movie_details["runtime"] if movie_details["runtime"] != 0 else None,
+        "wiki_id": movie_details["external_ids"]["wikidata_id"],
         "production_countries": production_countries,
         "genres": genres,
         "casts": casts,
@@ -359,7 +396,7 @@ async def clean_person_details(
 async def clean_watch_providers(
     movie_id: int,
     watch_providers: Dict
-) -> List:
+) -> List[Tuple]:
     movie_providers = []
     for country, details in watch_providers["results"].items():
         if details.get("buy") != None:
@@ -375,13 +412,164 @@ async def clean_watch_providers(
     return movie_providers
 
 @task(
+    name="Clean Movie Genres",
+    log_prints=True,
+    task_run_name="clean-genres-of-{movie_id}"
+)
+async def clean_genres(
+    movie_genres: List,
+    movie_id
+) -> List[Tuple]:
+    genres = [(movie_id, genre_id) for genre_id in movie_genres]
+
+    await asyncio.sleep(2)
+    return genres
+
+@task(
+    name="Clean Movie Languages",
+    log_prints=True,
+    task_run_name="clean-languages-of-{movie_id}"
+)
+async def clean_languages(
+    movie_languages: List,
+    movie_id
+) -> List[Tuple]:
+    languages = [(movie_id, language_id) for language_id in movie_languages]
+
+    await asyncio.sleep(2)
+    return languages
+
+@task(
+    name="Clean Production Countries",
+    log_prints=True,
+    task_run_name="clean-languages-of-{movie_id}"
+)
+async def clean_production_countries(
+    production_countries: List,
+    movie_id
+) -> List[Tuple]:
+    countries = [(movie_id, language_id) for language_id in production_countries]
+
+    await asyncio.sleep(2)
+    return countries
+
+@task(
+    name="Clean Wikidata",
+    log_prints=True,
+    task_run_name="clean-wikidata-of-{wiki_id}"
+)
+async def clean_wikidata(
+    wiki_id: str,
+    soup: BeautifulSoup
+) -> Dict:
+    imdb_id = soup.find("div", id="P345").find("a", class_="wb-external-id external").text
+    metacritic_id = soup.find("div", id="P1712").find("a", class_="wb-external-id external").text
+    rotten_tomatoes_id = soup.find("div", id="P1258").find("a", class_="wb-external-id external").text
+
+    await asyncio.sleep(2)
+    return {
+        "imdb_id": imdb_id,
+        "metacritic_id": metacritic_id,
+        "rotten_tomatoes_id": rotten_tomatoes_id
+    }
+
+@task(
+    name="Clean IMDB Ratings",
+    log_prints=True,
+    task_run_name="clean-imdb-rating-of-{imdb_id}"
+)
+async def clean_imdb_ratings(
+    imdb_id: str,
+    soup: BeautifulSoup
+) -> Dict:
+    review_sec = soup.find("div", class_="sc-3a4309f8-1 dOjKRs")
+
+    score = review_sec.find("span", class_="sc-d541859f-1 imUuxf").text
+    n_score = review_sec.find("div", class_="sc-d541859f-3 dwhNqC").text
+
+    magnitude_dict = {
+        "K": 1e3,
+        "M": 1e6
+    }
+
+    if n_score[-1] in magnitude_dict:
+        num, magnitude = n_score[:-1], n_score[-1]
+        num_score = float(num) * magnitude_dict[magnitude]
+
+    else:
+        num_score = float(n_score)
+
+    await asyncio.sleep(2)
+    return {
+        "imdb_id": imdb_id,
+        "user_score": int(float(score)*10),
+        "num_user": int(num_score)
+    }
+
+@task(
+    name="Clean Metacritic Ratings",
+    log_prints=True,
+    task_run_name="clean-metacritic-rating-of-{metacritic_id}"
+)
+async def clean_metacritic_ratings(
+    metacritic_id: str,
+    soup: BeautifulSoup
+) -> Dict:
+    review_sec = soup.find_all("div", class_="c-reviewsOverview_overviewDetails")
+
+    critic_reviews, user_reviews = review_sec[0], review_sec[2]
+
+    critic_scores = extract_metacritic_data(critic_reviews)
+    user_scores = extract_metacritic_data(user_reviews)
+
+    return {
+        "metacritic_id": metacritic_id,
+        "critic_score": critic_scores["review_score"],
+        "num_critic": critic_scores["num_reviews"],
+        "critic_positive": critic_scores["percent_positive"],
+        "critic_neutral": critic_scores["percent_neutral"],
+        "critic_negative": critic_scores["percent_negative"],
+        "user_score": user_scores["review_score"],
+        "num_user": user_scores["num_reviews"],
+        "user_positive": user_scores["percent_positive"],
+        "user_neutral": user_scores["percent_neutral"],
+        "user_negative": user_scores["percent_negative"]
+    }
+
+@task(
+    name="Clean Rotten Tomatoes Ratings",
+    log_prints=True,
+    task_run_name="clean-rotten-tomatoes-rating-of-{rotten_tomatoes_id}"
+)
+async def clean_rotten_tomatoes_ratings(
+    rotten_tomatoes_id: str,
+    soup: BeautifulSoup
+) -> Dict:
+    review_sec = soup.find("div", class_="media-scorecard")
+
+    critic_score = re.search(r"\d+(?=%)", review_sec.find("rt-text", slot="criticsScore").text).group()
+    num_critic = re.search(r"\d[\d,]*", review_sec.find("rt-link", slot="criticsReviews").text).group().replace(",", "")
+    user_score = re.search(r"\d+(?=%)", review_sec.find("rt-text", slot="audienceScore").text).group()
+    num_user = re.search(r"\d[\d,]*", review_sec.find("rt-link", slot="audienceReviews").text).group().replace(",", "")
+
+    return {
+        "rotten_tomatoes_id": rotten_tomatoes_id,
+        "critic_score": critic_score,
+        "num_critic": num_critic,
+        "user_score": user_score,
+        "num_user": num_user
+    }
+
+@task(
     name="Load Single Row to DB",
     log_prints=True,
-    task_run_name="load-data-id-{id}-to-db-{table_name}"
+    task_run_name="load-data-id-{primary_key_id}-to-db-{table_name}",
+    retries=2,
+    retry_delay_seconds=2
 )
 async def load_single_row_to_db(
     table_name: str,
-    id: int,
+    primary_key_id: int,
     data: Dict,
     engine: Engine
 ):
@@ -401,8 +589,13 @@ async def load_single_row_to_db(
                 data
             )
         connection.commit()
+    
     except Exception as e:
-        logger.error(f"Error inserting row: {e}")
+        if "duplicate key value violates unique constraint" in str(e):
+            logger.warning(f"Row already exist!")
+        else:
+            raise e
+    
     finally:
         connection.close()
 
@@ -411,11 +604,10 @@ async def load_single_row_to_db(
 @task(
     name="Load Multi Row to DB",
     log_prints=True,
-    task_run_name="load-data-multi-row-to-db-{table_name}"
+    task_run_name="load-multi-row-data-to-db-{table_name}"
 )
 async def load_multi_row_to_db(
     table_name: str,
-    id: int,
     columns: List,
     data: List,
     engine: Engine
@@ -429,11 +621,15 @@ async def load_multi_row_to_db(
                 f"""INSERT INTO {table_name}
                 ({", ".join(columns)})
                 VALUES
-                {str(data)[1:-1]}"""
+                {str(data)[1:-1]}
+                ON CONFLICT DO NOTHING"""
             )
         connection.commit()
+
     except Exception as e:
         logger.error(f"Error inserting row: {e}")
+        raise e
+    
     finally:
         connection.close()
 
