@@ -9,14 +9,10 @@ sys.path.append(str(pathlib.Path(os.path.dirname(os.path.realpath(__file__)), "s
 from prefect import flow
 from src.movie_etl.flows.etl_flow import movies_flow
 
-# @flow(
-#     name="Movies ETL Flow",
-#     log_prints=True
-# )
 async def main(
     start_date: str=None,
     end_date: str=None,
-    vote_count_minimum: int=2,
+    vote_count_minimum: int=50,
     # movie_limit: int=5,
     # person_limit: int=20,
     # review_limit: int=15
@@ -38,7 +34,4 @@ async def main(
     )
 
 if __name__ == "__main__":
-    # main.serve(
-    #     name="Movies ETL Deployment",
-    # )
     asyncio.run(main())
