@@ -54,9 +54,44 @@ def extract_metacritic_data(
     percent_negative = int(re.search(r"\d+(?=%)", negative_sentiments.text).group())
 
     return {
-        "review_score": int(float(review_score*10)) if "." in review_score else int(float(review_score)),
+        "review_score": int(float(review_score)*10) if "." in review_score else int(float(review_score)),
         "num_reviews": num_reviews,
         "percent_positive": percent_positive,
         "percent_neutral": percent_neutral,
         "percent_negative": percent_negative
     }
+
+def rollback_movie(
+    movie_id: int,
+    engine: Engine
+):
+    tables = [
+        "movie_production",
+        "movie_language",
+        "movie_genre",
+        "movie_cast",
+        "movie_crew",
+        "movie_provider",
+        "production_country",
+        "rotten_tomatoes_details",
+        "imdb_details",
+        "metacritic_details"
+    ]
+
+    connection = engine.raw_connection()
+
+    for table in tables:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"DELETE FROM {table} where movie_id = {movie_id}"
+            )
+
+        connection.commit()
+    
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"DELETE FROM movies where movie_id = {movie_id}"
+        )
+    connection.commit()
+
+    connection.close()

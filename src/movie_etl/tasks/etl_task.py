@@ -4,14 +4,13 @@ import requests
 import os
 import asyncio
 from sqlalchemy.engine.base import Engine
-from movie_etl.utils.etl import extract_metacritic_data
 from prefect import task, get_run_logger
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 import pandas as pd
 import re
 
-from src.movie_etl.utils.etl import map_gender
+from src.movie_etl.utils.etl import map_gender, extract_metacritic_data
 
 tmdb_headers = {
     "accept": "application/json",

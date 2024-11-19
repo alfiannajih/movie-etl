@@ -12,7 +12,7 @@ from src.movie_etl.flows.etl_flow import movies_flow
 async def main(
     start_date: str=None,
     end_date: str=None,
-    vote_count_minimum: int=50,
+    vote_count_minimum: int=20,
     # movie_limit: int=5,
     # person_limit: int=20,
     # review_limit: int=15

@@ -7,8 +7,7 @@ import asyncio
 from prefect import task, get_run_logger, flow
 from prefect.context import FlowRunContext
 
-
-from src.movie_etl.utils.etl import is_primary_key_exist_in_table
+from src.movie_etl.utils.etl import is_primary_key_exist_in_table, rollback_movie
 from src.movie_etl.tasks.etl_task import (
     get_movie_ids,
     get_data_from_tmdb_api,
@@ -492,7 +491,17 @@ async def single_movie_flow(movie_id: int):
     else:
         logger.warning("Wiki ID doesn't exists!")
 
-    await asyncio.gather(*futures)
+    try:
+        await asyncio.gather(*futures)
+
+    except Exception as e:
+        logger.error(f"Error processing movie: {e}")
+        logger.warning("Rollback current movie")
+        rollback_movie(movie_id, engine)
+        raise e
+    
+    finally:
+        await asyncio.sleep(5)
 
 @flow(
     name="Movies ETL Flow",
@@ -502,7 +511,7 @@ async def single_movie_flow(movie_id: int):
 async def movies_flow(
     start_date: str="2024-10-15",
     end_date: str="2024-11-01",
-    vote_count_minimum: int=10,
+    vote_count_minimum: int=50,
 ):
     logger = get_run_logger()
     logger.info("Start movies ETL flow")
@@ -513,7 +522,7 @@ async def movies_flow(
     futures = []
     for movie_id in movie_ids:
         if is_primary_key_exist_in_table(movie_id, "movie_id", "movies", engine):
-            logger.warning("Movie details already exist")
+            logger.warning(f"Movie-{movie_id} already exist")
             continue
         futures.append(process_movie_with_semaphore(single_movie_flow.with_options(task_runner=task_runner_type())(movie_id)))
     await asyncio.gather(*futures)
