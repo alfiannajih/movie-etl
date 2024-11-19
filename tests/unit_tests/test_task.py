@@ -172,7 +172,7 @@ class UnitTestETLTask(unittest.IsolatedAsyncioTestCase):
 
         await load_single_row_to_db.fn(
             table_name=table_name,
-            id=id,
+            primary_key_id=id,
             data=data,
             engine=mock_engine
         )
@@ -212,7 +212,6 @@ class UnitTestETLTask(unittest.IsolatedAsyncioTestCase):
 
         await load_multi_row_to_db.fn(
             table_name=table_name,
-            id=id,
             columns=columns,
             data=data,
             engine=mock_engine
@@ -221,7 +220,8 @@ class UnitTestETLTask(unittest.IsolatedAsyncioTestCase):
         expected_query = f"""INSERT INTO movie_provider
         (movie_id, country_id, provider_id, type)
         VALUES
-        {str(data)[1:-1]}""".replace('\n', '').replace('  ', '').strip()
+        {str(data)[1:-1]}
+        ON CONFLICT DO NOTHING""".replace('\n', '').replace('  ', '').strip()
         
         mock_cursor.execute.assert_called_once()
         actual_query = mock_cursor.execute.call_args[0][0].replace('\n', '').replace('  ', '').strip()
