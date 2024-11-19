@@ -51,7 +51,7 @@ CREATE TABLE "people" (
 
 CREATE TABLE "countries" (
     "country_id" CHAR(2) PRIMARY KEY,
-    "country" VARCHAR(30)
+    "country" VARCHAR(60)
 );
 
 CREATE TABLE "watch_providers" (
@@ -63,20 +63,31 @@ CREATE TABLE "rotten_tomatoes_details" (
     "rotten_tomatoes_id" VARCHAR(255) PRIMARY KEY,
     "movie_id" BIGINT,
     "critic_score" INTEGER,
-    "audience_score" INTEGER
+    "num_critic" INTEGER,
+    "user_score" INTEGER,
+    "num_user" INTEGER
 );
 
 CREATE TABLE "imdb_details" (
     "imdb_id" VARCHAR(30) PRIMARY KEY,
     "movie_id" BIGINT,
-    "imdb_score" FLOAT(2)
+    "user_score" INTEGER,
+    "num_user" INTEGER
 );
 
 CREATE TABLE "metacritic_details" (
     "metacritic_id" VARCHAR(255) PRIMARY KEY,
     "movie_id" BIGINT,
-    "meta_score" INTEGER,
-    "user_score" INTEGER
+    "critic_score" INTEGER,
+    "num_critic" INTEGER,
+    "critic_positive" INTEGER,
+    "critic_neutral" INTEGER,
+    "critic_negative" INTEGER,
+    "user_score" INTEGER,
+    "num_user" INTEGER,
+    "user_positive" INTEGER,
+    "user_neutral" INTEGER,
+    "user_negative" INTEGER
 );
 
 CREATE TABLE "movie_production" (
