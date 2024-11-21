@@ -4,12 +4,10 @@ import os
 from typing import List, Dict
 from sqlalchemy import create_engine, URL
 import asyncio
-from prefect import task, get_run_logger, flow
-from prefect.context import FlowRunContext
+from prefect import get_run_logger, flow
 
 from src.movie_etl.utils.etl import is_primary_key_exist_in_table, rollback_movie
 from src.movie_etl.tasks.etl_task import (
-    get_movie_ids,
     get_data_from_tmdb_api,
     clean_movie_details,
     clean_collection_details,
@@ -35,25 +33,11 @@ url_object = URL.create(
     username=os.getenv("POSTGRES_USER"),
     password=os.getenv("POSTGRES_PASSWORD"),
     host=os.getenv("POSTGRES_HOST"),
-    database=os.getenv("POSTGRES_DB")
+    database=os.getenv("POSTGRES_DB"),
+    port=os.getenv("POSTGRES_PORT")
 )
 
 engine = create_engine(url_object)
-
-people_details_limit = asyncio.Semaphore(5)
-movie_limit = asyncio.Semaphore(2)
-
-async def process_people_with_semaphore(coro):
-    async with people_details_limit:
-        return await coro
-    
-async def process_movie_with_semaphore(coro):
-    async with movie_limit:
-        return await coro
-
-# async def process_with_semaphore(coro, limit):
-#     async with asyncio.Semaphore(limit):
-#         return await coro
 
 @flow(
     name="Movie Details ETL",
@@ -208,7 +192,7 @@ async def movie_production_flow(
         await load_single_row_to_db(
             table_name="movie_production",
             data={"company_id": company_id, "movie_id": movie_id},
-            primary_key_id=movie_id,
+            primary_key_id=company_id,
             engine=engine
         )
 
@@ -284,7 +268,7 @@ async def cast_flow(
     await load_single_row_to_db(
         table_name="movie_cast",
         data=cast | {"movie_id": movie_id},
-        primary_key_id=movie_id,
+        primary_key_id=person_id,
         engine=engine
     )
 
@@ -297,7 +281,13 @@ async def movie_cast_flow(
     movie_id: int,
     movie_casts: List
 ):
-    futures = [process_people_with_semaphore(cast_flow(movie_id, cast, cast["person_id"])) for cast in movie_casts]
+    cast_details_limit = asyncio.Semaphore(10)
+
+    async def process_cast_with_semaphore(coro):
+        async with cast_details_limit:
+            return await coro
+
+    futures = [process_cast_with_semaphore(cast_flow(movie_id, cast, cast["person_id"])) for cast in movie_casts]
     await asyncio.gather(*futures)
 
 @flow(
@@ -330,7 +320,7 @@ async def crew_flow(
     await load_single_row_to_db(
         table_name="movie_crew",
         data=crew | {"movie_id": movie_id},
-        primary_key_id=movie_id,
+        primary_key_id=person_id,
         engine=engine
     )
 
@@ -343,7 +333,13 @@ async def movie_crew_flow(
     movie_id: int,
     movie_crews: List
 ):
-    futures = [process_people_with_semaphore(crew_flow(movie_id, crew, crew["person_id"])) for crew in movie_crews]
+    crew_limit = asyncio.Semaphore(10)
+
+    async def process_crew_with_semaphore(coro):
+        async with crew_limit:
+            return await coro
+
+    futures = [process_crew_with_semaphore(crew_flow(movie_id, crew, crew["person_id"])) for crew in movie_crews]
     await asyncio.gather(*futures)
 
 @flow(
@@ -498,33 +494,6 @@ async def single_movie_flow(movie_id: int):
         logger.error(f"Error processing movie: {e}")
         logger.warning("Rollback current movie")
         rollback_movie(movie_id, engine)
-        raise e
     
     finally:
         await asyncio.sleep(5)
-
-@flow(
-    name="Movies ETL Flow",
-    log_prints=True,
-    flow_run_name="etl-flow-on-{start_date}--{end_date}"
-)
-async def movies_flow(
-    start_date: str="2024-10-15",
-    end_date: str="2024-11-01",
-    vote_count_minimum: int=50,
-):
-    logger = get_run_logger()
-    logger.info("Start movies ETL flow")
-    movie_ids = await get_movie_ids(start_date=start_date, end_date=end_date, vote_count_minimum=vote_count_minimum)
-    logger.info("Got " + str(len(movie_ids)) + " movie_ids")
-    
-    task_runner_type = type(FlowRunContext.get().task_runner)
-    futures = []
-    for movie_id in movie_ids:
-        if is_primary_key_exist_in_table(movie_id, "movie_id", "movies", engine):
-            logger.warning(f"Movie-{movie_id} already exist")
-            continue
-        futures.append(process_movie_with_semaphore(single_movie_flow.with_options(task_runner=task_runner_type())(movie_id)))
-    await asyncio.gather(*futures)
-
-    logger.info("Finished movies ETL flow")

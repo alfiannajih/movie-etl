@@ -1,7 +1,7 @@
 from sqlalchemy.engine.base import Engine
 import re
-import ast
 from bs4 import BeautifulSoup
+from datetime import date, timedelta
 
 gender_dict = {
     0: "Not specified",
@@ -95,3 +95,10 @@ def rollback_movie(
     connection.commit()
 
     connection.close()
+
+def get_previous_week(
+    current_date: date=date.today()
+) -> date:
+    previous_date = (current_date - timedelta(days=7))
+
+    return previous_date

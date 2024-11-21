@@ -5,6 +5,7 @@ import os
 import asyncio
 from sqlalchemy.engine.base import Engine
 from prefect import task, get_run_logger
+from prefect.cache_policies import NONE
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 import pandas as pd
@@ -58,13 +59,18 @@ async def get_movie_ids(
             url,
             headers=tmdb_headers,
             params=params
-        ).json()
+        )
 
-        current_ids = [movie["id"] for movie in response["results"]]
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            raise e
+
+        current_ids = [movie["id"] for movie in response.json()["results"]]
         movie_ids.extend(current_ids)
         
         page += 1
-        total_pages = response["total_pages"]
+        total_pages = response.json()["total_pages"]
         
     # logger.info(f"Get {len(movie_ids)} movie_ids")
     await asyncio.sleep(2)
@@ -87,16 +93,21 @@ async def get_data_from_tmdb_api(
             url,
             headers=tmdb_headers,
             params=params
-        ).json()
+        )
     else:
         response = requests.get(
             f"{url}/{id}",
             headers=tmdb_headers,
             params=params
-        ).json()
+        )
+    
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        raise e
 
     await asyncio.sleep(2)
-    return response
+    return response.json()
 
 @task(
     name="Scrape Data from HTML Content",
@@ -516,7 +527,11 @@ async def clean_metacritic_ratings(
 ) -> Dict:
     review_sec = soup.find_all("div", class_="c-reviewsOverview_overviewDetails")
 
-    critic_reviews, user_reviews = review_sec[0], review_sec[2]
+    try:
+        critic_reviews, user_reviews = review_sec[0], review_sec[2]
+
+    except:
+        critic_reviews, user_reviews = review_sec[0], review_sec[1]
 
     critic_scores = extract_metacritic_data(critic_reviews)
     user_scores = extract_metacritic_data(user_reviews)
@@ -546,10 +561,19 @@ async def clean_rotten_tomatoes_ratings(
 ) -> Dict:
     review_sec = soup.find("div", class_="media-scorecard")
 
-    critic_score = re.search(r"\d+(?=%)", review_sec.find("rt-text", slot="criticsScore").text).group()
-    num_critic = re.search(r"\d[\d,]*", review_sec.find("rt-link", slot="criticsReviews").text).group().replace(",", "")
-    user_score = re.search(r"\d+(?=%)", review_sec.find("rt-text", slot="audienceScore").text).group()
-    num_user = re.search(r"\d[\d,]*", review_sec.find("rt-link", slot="audienceReviews").text).group().replace(",", "")
+    try:
+        critic_score = re.search(r"\d+(?=%)", review_sec.find("rt-text", slot="criticsScore").text).group()
+        num_critic = re.search(r"\d[\d,]*", review_sec.find("rt-link", slot="criticsReviews").text).group().replace(",", "")
+    except:
+        critic_score = None
+        num_critic = None
+
+    try:
+        user_score = re.search(r"\d+(?=%)", review_sec.find("rt-text", slot="audienceScore").text).group()
+        num_user = re.search(r"\d[\d,]*", review_sec.find("rt-link", slot="audienceReviews").text).group().replace(",", "")
+    except:
+        user_score = None
+        num_user = None
 
     return {
         "rotten_tomatoes_id": rotten_tomatoes_id,
@@ -564,7 +588,8 @@ async def clean_rotten_tomatoes_ratings(
     log_prints=True,
     task_run_name="load-data-id-{primary_key_id}-to-db-{table_name}",
     retries=2,
-    retry_delay_seconds=2
+    retry_delay_seconds=2,
+    cache_policy=NONE
 )
 async def load_single_row_to_db(
     table_name: str,
@@ -603,7 +628,8 @@ async def load_single_row_to_db(
 @task(
     name="Load Multi Row to DB",
     log_prints=True,
-    task_run_name="load-multi-row-data-to-db-{table_name}"
+    task_run_name="load-multi-row-data-to-db-{table_name}",
+    cache_policy=NONE
 )
 async def load_multi_row_to_db(
     table_name: str,
