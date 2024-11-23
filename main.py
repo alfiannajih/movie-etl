@@ -7,7 +7,7 @@ from datetime import date
 sys.path.append(str(pathlib.Path(os.path.dirname(os.path.realpath(__file__)), "src")))
 
 from prefect import flow, get_run_logger
-from src.movie_etl.utils.etl import is_primary_key_exist_in_table, get_previous_week
+from src.movie_etl.utils.etl import is_primary_key_exist_in_table, get_previous_week, generate_flow_run_name
 from src.movie_etl.tasks.etl_task import get_movie_ids
 from src.movie_etl.flows.etl_flow import single_movie_flow, engine
 
@@ -20,13 +20,18 @@ async def process_movie_with_semaphore(coro):
 @flow(
     name="Movies ETL Flow",
     log_prints=True,
-    flow_run_name="etl-flow-on-{start_date}--{end_date}"
+    flow_run_name=generate_flow_run_name,
+    validate_parameters=False
 )
 async def movies_flow(
-    start_date: date=get_previous_week(),
-    end_date: date=date.today(),
-    vote_count_minimum: int=1,
+    start_date: date=None,
+    end_date: date=None,
+    vote_count_minimum: int=5,
 ):
+    if start_date is None or end_date is None:
+        start_date = date.today()
+        end_date = get_previous_week()
+    
     start_date = start_date.strftime("%Y-%m-%d")
     end_date = end_date.strftime("%Y-%m-%d")
 
@@ -39,7 +44,6 @@ async def movies_flow(
     for movie_id in movie_ids:
         if is_primary_key_exist_in_table(movie_id, "movie_id", "movies", engine):
             logger.warning(f"Movie-{movie_id} already exist")
-            continue
         futures.append(process_movie_with_semaphore(single_movie_flow(movie_id)))
     await asyncio.gather(*futures)
 

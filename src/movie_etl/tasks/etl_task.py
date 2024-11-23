@@ -7,8 +7,6 @@ from sqlalchemy.engine.base import Engine
 from prefect import task, get_run_logger
 from prefect.cache_policies import NONE
 from bs4 import BeautifulSoup
-from bs4.element import Tag
-import pandas as pd
 import re
 
 from src.movie_etl.utils.etl import map_gender, extract_metacritic_data

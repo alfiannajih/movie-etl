@@ -2,6 +2,7 @@ from sqlalchemy.engine.base import Engine
 import re
 from bs4 import BeautifulSoup
 from datetime import date, timedelta
+from prefect.runtime import flow_run
 
 gender_dict = {
     0: "Not specified",
@@ -102,3 +103,17 @@ def get_previous_week(
     previous_date = (current_date - timedelta(days=7))
 
     return previous_date
+
+def generate_flow_run_name():
+    parameters = flow_run.parameters
+    start_date = parameters["start_date"]
+    end_date = parameters["end_date"]
+
+    if start_date is None or end_date is None:
+        start_date = date.today()
+        end_date = get_previous_week()
+    
+    start_date = start_date.strftime("%Y-%m-%d")
+    end_date = end_date.strftime("%Y-%m-%d")
+
+    return f"etl-flow-on-{start_date}--{end_date}"
