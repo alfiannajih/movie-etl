@@ -110,10 +110,7 @@ def generate_flow_run_name():
     end_date = parameters["end_date"]
 
     if start_date is None or end_date is None:
-        start_date = date.today()
-        end_date = get_previous_week()
-    
-    start_date = start_date.strftime("%Y-%m-%d")
-    end_date = end_date.strftime("%Y-%m-%d")
+        start_date = date.today().strftime("%Y-%m-%d")
+        end_date = get_previous_week().strftime("%Y-%m-%d")
 
     return f"etl-flow-on-{start_date}--{end_date}"
