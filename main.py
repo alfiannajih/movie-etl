@@ -11,12 +11,6 @@ from src.movie_etl.utils.etl import is_primary_key_exist_in_table, get_previous_
 from src.movie_etl.tasks.etl_task import get_movie_ids
 from src.movie_etl.flows.etl_flow import single_movie_flow, engine
 
-movie_limit = asyncio.Semaphore(3)
-
-async def process_movie_with_semaphore(coro):
-    async with movie_limit:
-        return await coro
-
 @flow(
     name="Movies ETL Flow",
     log_prints=True,
@@ -27,6 +21,8 @@ async def movies_flow(
     start_date: date=None,
     end_date: date=None,
     vote_count_minimum: int=5,
+    movie_limit: int=3,
+    person_limit: int=10
 ):
     if start_date is None or end_date is None:
         start_date = date.today()
@@ -34,6 +30,11 @@ async def movies_flow(
     
     start_date = start_date.strftime("%Y-%m-%d")
     end_date = end_date.strftime("%Y-%m-%d")
+
+    limit = asyncio.Semaphore(movie_limit)
+    async def process_movie_with_semaphore(coro):
+        async with limit:
+            return await coro
 
     logger = get_run_logger()
     logger.info("Start movies ETL flow")
@@ -44,7 +45,8 @@ async def movies_flow(
     for movie_id in movie_ids:
         if is_primary_key_exist_in_table(movie_id, "movie_id", "movies", engine):
             logger.warning(f"Movie-{movie_id} already exist")
-        futures.append(process_movie_with_semaphore(single_movie_flow(movie_id)))
+            continue
+        futures.append(process_movie_with_semaphore(single_movie_flow(movie_id, person_limit)))
     await asyncio.gather(*futures)
 
     logger.info("Finished movies ETL flow")

@@ -278,9 +278,10 @@ async def cast_flow(
 )
 async def movie_cast_flow(
     movie_id: int,
-    movie_casts: List
+    movie_casts: List,
+    person_limit: int
 ):
-    cast_details_limit = asyncio.Semaphore(10)
+    cast_details_limit = asyncio.Semaphore(person_limit)
 
     async def process_cast_with_semaphore(coro):
         async with cast_details_limit:
@@ -330,9 +331,10 @@ async def crew_flow(
 )
 async def movie_crew_flow(
     movie_id: int,
-    movie_crews: List
+    movie_crews: List,
+    person_limit: int
 ):
-    crew_limit = asyncio.Semaphore(10)
+    crew_limit = asyncio.Semaphore(person_limit)
 
     async def process_crew_with_semaphore(coro):
         async with crew_limit:
@@ -451,13 +453,16 @@ async def rotten_tomatoes_ratings_flow(
     log_prints=True,
     flow_run_name="movie-flow-on-{movie_id}"
 )
-async def single_movie_flow(movie_id: int):
+async def single_movie_flow(movie_id: int, person_limit: int):
     logger = get_run_logger()
     movie_details = await movie_details_flow(movie_id)
 
+    logger.info(f"Get movie casts: {len(movie_details["casts"])}")
+    logger.info(f"Get movie crews: {len(movie_details["crews"])}")
+
     futures = [
-        movie_cast_flow(movie_id, movie_details["casts"]),
-        movie_crew_flow(movie_id, movie_details["crews"]),
+        movie_cast_flow(movie_id, movie_details["casts"], person_limit),
+        movie_crew_flow(movie_id, movie_details["crews"], person_limit),
         movie_provder_flow(movie_id, movie_details["watch_providers"]),
     ]
 
