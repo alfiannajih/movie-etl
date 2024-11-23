@@ -25,8 +25,8 @@ async def movies_flow(
     person_limit: int=10
 ):
     if start_date is None or end_date is None:
-        start_date = date.today()
-        end_date = get_previous_week()
+        end_date = date.today()
+        start_date = get_previous_week()
     
     start_date = start_date.strftime("%Y-%m-%d")
     end_date = end_date.strftime("%Y-%m-%d")
@@ -45,7 +45,7 @@ async def movies_flow(
     for movie_id in movie_ids:
         if is_primary_key_exist_in_table(movie_id, "movie_id", "movies", engine):
             logger.warning(f"Movie-{movie_id} already exist")
-            continue
+            
         futures.append(process_movie_with_semaphore(single_movie_flow(movie_id, person_limit)))
     await asyncio.gather(*futures)
 

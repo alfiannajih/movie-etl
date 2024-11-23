@@ -27,8 +27,8 @@ headers = {
     task_run_name="get-movie-ids-on-{start_date}--{end_date}"
 )
 async def get_movie_ids(
-    start_date: str="2020-01-01",
-    end_date: str="2020-02-01",
+    start_date: str=None,
+    end_date: str=None,
     url: str="https://api.themoviedb.org/3/discover/movie",
     vote_count_minimum: int=10,
     original_language: str="en"
