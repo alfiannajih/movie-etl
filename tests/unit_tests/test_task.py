@@ -11,7 +11,6 @@ from src.movie_etl.tasks.etl_task import (
     get_movie_ids,
     clean_movie_details,
     get_movie_ids,
-    get_data_from_tmdb_api,
     clean_collection_details,
     clean_company_details,
     clean_person_details,
