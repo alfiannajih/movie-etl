@@ -37,7 +37,7 @@ deployments:
   entrypoint: main.py:movies_flow
   parameters: {}
   work_pool:
-    name: "local-work-pool"
+    name: "cloud-run-worker"
     job_variables:
       image: "alfiannajih/movie-etl:v1"
       env:
