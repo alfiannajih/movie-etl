@@ -3,6 +3,8 @@ import re
 from bs4 import BeautifulSoup
 from datetime import date, timedelta
 from prefect.runtime import flow_run
+import pandas as pd
+from typing import List
 
 gender_dict = {
     0: "Not specified",
@@ -114,3 +116,10 @@ def generate_flow_run_name():
         start_date = get_previous_week().strftime("%Y-%m-%d")
 
     return f"etl-flow-on-{start_date}--{end_date}"
+
+def load_to_csv(
+    path: str,
+    df: pd.DataFrame,
+    property_columns: List
+):
+    df[property_columns].to_csv(path, index=False)

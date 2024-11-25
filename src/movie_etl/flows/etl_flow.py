@@ -24,6 +24,7 @@ from src.movie_etl.tasks.etl_task import (
     clean_metacritic_ratings,
     clean_wikidata
 )
+from src.movie_etl.flows.kg_flow import entity_flow
 
 load_dotenv()
 
@@ -77,6 +78,19 @@ async def movie_details_flow(
         ]},
         primary_key_id=movie_id,
         engine=engine
+    )
+    entity_flow(
+        node_label="Movie",
+        node_property={k: movie_details[k] for k in [
+            "movie_id",
+            "title",
+            "overview",
+            "release_date",
+            "popularity",
+            "budget",
+            "revenue",
+            "runtime"
+        ]},
     )
 
     return movie_details
