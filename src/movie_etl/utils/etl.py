@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from datetime import date, timedelta
 from prefect.runtime import flow_run
 import pandas as pd
-from typing import List
+from typing import List, Dict
 
 gender_dict = {
     0: "Not specified",
@@ -13,10 +13,29 @@ gender_dict = {
     3: "Non-binary"
 }
 
+departement_dict = {
+    "Writing": "WRITTEN_BY",
+    "Editing": "EDITED_BY",
+    "Crew": "CREW_BY",
+    "Directing": "DIRECTED_BY",
+    "Camera": "CAMERA_BY",
+    "Lighting": "LIGHTNING_BY",
+    "Costume & Make-Up": "COSTUMED_AND_MAKEUP_BY",
+    "Sound": "SOUND_BY",
+    "Production": "PRODUCED_BY",
+    "Art": "ART_BY",
+    "Visual Effects": "VISUAL_EFFECTS_BY"
+}
+
 def map_gender(
     gender_id: int
 ) -> str:
     return gender_dict[gender_id]
+
+def map_departement(
+    departement: str
+) -> str:
+    return departement_dict[departement]
 
 def is_primary_key_exist_in_table(
     primary_key,
@@ -123,3 +142,25 @@ def load_to_csv(
     property_columns: List
 ):
     df[property_columns].to_csv(path, index=False)
+
+def parse_property(property: Dict, map_keys: Dict={}, date_keys: List=[]):
+    property_str = []
+
+    for k, v in property.items():
+        if v != None and k not in date_keys and k not in map_keys.keys():
+            property_str.append(f"{k}: ${k}")
+            # if type(v) == str:
+            #     property_str.append(f'{k}: "{v}"')
+            # else:
+            #     property_str.append(f"{k}: {v}")
+
+    for k, v in map_keys.items():
+        property_str.append(f"{v}: ${k}")
+
+    for k in date_keys:
+        if property[k] != None:
+            property_str.append(f"{k}: datetime(${k})")
+
+    property_str = ", ".join(property_str)
+
+    return property_str

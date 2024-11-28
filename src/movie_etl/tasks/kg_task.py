@@ -1,65 +1,80 @@
 from typing import List, Dict
 from prefect.cache_policies import NONE
-from prefect import task
+from prefect import task, get_run_logger
+from neo4j import Driver
+import asyncio
+
+from src.movie_etl.utils.etl import parse_property
 
 @task(
     name="Load Single Entity to KG",
+    log_prints=True,
     cache_policy=NONE
 )
-def load_entity_to_kg(
+async def load_entity_to_kg(
     node_label: str,
     node_property: Dict,
-    driver
+    driver: Driver,
+    date_keys: List=[]
 ):
-    node_property_str = []
-
-    for k, v in node_property.items():
-        if v != None:
-            if type(v) == str:
-                node_property_str.append(f'{k}: "{v}"')
-            else:
-                node_property_str.append(f"{k}: {v}")
-    
-    node_property_str = ", ".join(node_property_str)
+    logger = get_run_logger()
+    node_property_str = parse_property(node_property, date_keys=date_keys)
 
     try:
         with driver.session() as session:
             session.run(
-                f"""CREATE (n:{node_label} {{{node_property_str}}})"""
+                f"""CREATE (n:{node_label} {{{node_property_str}}})""",
+                parameters=node_property
             )
 
     except Exception as e:
-        raise e
+        if "already exists with label" in str(e):
+            logger.warning(f"Node already exist!")
+        else:
+            raise e
 
-def load_relationship_to_kg(
+    await asyncio.sleep(2)
+
+@task(
+    name="Load Single Relationship to KG",
+    log_prints=True,
+    cache_policy=NONE
+)
+async def load_relationship_to_kg(
     relationship_label: str,
     head_label: str,
     tail_label: str,
     head_property_id: Dict,
     tail_property_id: Dict,
-    relationship_property: Dict,
-    driver
+    driver,
+    relationship_property: Dict={},
+    head_map_key: Dict={},
+    tail_map_key: Dict={}
 ):
-    relationship_property_str = []
+    logger = get_run_logger()
+    if relationship_property != {}:
+        relationship_property_str = parse_property(relationship_property)
+    else:
+        relationship_property_str = ""
 
-    for k, v in relationship_property.items():
-        if v != None:
-            if type(v) == str:
-                relationship_property_str.append(f'{k}: "{v}"')
-            else:
-                relationship_property_str.append(f"{k}: {v}")
-    
-    relationship_property_str = ", ".join(relationship_property_str)
+    head_property_str = parse_property(head_property_id, map_keys=head_map_key)
+    tail_property_str = parse_property(tail_property_id, map_keys=tail_map_key)
 
     try:
         with driver.session() as session:
-            session.run(            
-                f"""MATCH (h:{head_label}{{{head_property_id}}}), (t:{tail_label}{{{tail_property_id}}})
-                CREATE (h)-[r:{relationship_label} {{{relationship_property_str}}}]->(t)"""
+            session.run(
+                f"""MATCH (h:{head_label} {{{head_property_str}}}), (t:{tail_label} {{{tail_property_str}}})
+                CREATE (h)-[r:{relationship_label} {{{relationship_property_str}}}]->(t)""",
+                parameters=head_property_id | tail_property_id | relationship_property
             )
 
     except Exception as e:
-        raise e
+        if "already exists with label" in str(e):
+            logger.warning(f"Relationship already exist!")
+        else:
+            raise e
+    
+    await asyncio.sleep(2)
 
 @task(
     name="Load Bulk Entity to KG",

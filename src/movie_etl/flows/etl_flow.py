@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, URL
 import asyncio
 from prefect import get_run_logger, flow
 
-from src.movie_etl.utils.etl import is_primary_key_exist_in_table, rollback_movie
+from src.movie_etl.utils.etl import is_primary_key_exist_in_table, rollback_movie, map_departement
 from src.movie_etl.tasks.etl_task import (
     get_data_from_tmdb_api,
     clean_movie_details,
@@ -24,7 +24,8 @@ from src.movie_etl.tasks.etl_task import (
     clean_metacritic_ratings,
     clean_wikidata
 )
-from src.movie_etl.flows.kg_flow import entity_flow
+from src.movie_etl.tasks.kg_task import load_entity_to_kg, load_relationship_to_kg
+from src.movie_etl.flows.kg_flow import driver, bulk_entity_flow
 
 load_dotenv()
 
@@ -79,7 +80,8 @@ async def movie_details_flow(
         primary_key_id=movie_id,
         engine=engine
     )
-    entity_flow(
+
+    await load_entity_to_kg(
         node_label="Movie",
         node_property={k: movie_details[k] for k in [
             "movie_id",
@@ -91,7 +93,19 @@ async def movie_details_flow(
             "revenue",
             "runtime"
         ]},
+        driver=driver,
+        date_keys=["release_date"]
     )
+
+    if movie_details["collection_id"] != None:
+        await load_relationship_to_kg(
+            relationship_label="PART_OF",
+            head_label="Movie",
+            tail_label="MovieCollection",
+            head_property_id={"movie_id": movie_id},
+            tail_property_id={"collection_id": movie_details["collection_id"]},
+            driver=driver
+        )
 
     return movie_details
 
@@ -117,6 +131,12 @@ async def movie_collection_flow(
             engine=engine
         )
 
+        await load_entity_to_kg(
+            node_label="MovieCollection",
+            node_property=collection_details,
+            driver=driver
+        )
+
 @flow(
     name="Movie Genre Load",
     log_prints=True,
@@ -135,6 +155,16 @@ async def movie_genre_flow(
         engine=engine
     )
 
+    for movie_id, genre_id in genres:
+        await load_relationship_to_kg(
+            relationship_label="HAS_GENRE",
+            head_label="Movie",
+            tail_label="Genre",
+            head_property_id={"movie_id": movie_id},
+            tail_property_id={"genre_id": genre_id},
+            driver=driver
+        )
+
 @flow(
     name="Movie Language Load",
     log_prints=True,
@@ -152,6 +182,16 @@ async def movie_language_flow(
         data=languages,
         engine=engine
     )
+
+    for movie_id, language_id in languages:
+        await load_relationship_to_kg(
+            relationship_label="HAS_LANGUAGE",
+            head_label="Movie",
+            tail_label="Language",
+            head_property_id={"movie_id": movie_id},
+            tail_property_id={"language_id": language_id},
+            driver=driver
+        )
 
 @flow(
     name="Company Details ET",
@@ -201,12 +241,48 @@ async def movie_production_flow(
                     primary_key_id=companies_to_add[i]["company_id"],
                     engine=engine
                 )
+                
+                await load_entity_to_kg(
+                    node_label="Company",
+                    node_property=companies_to_add[i],
+                    driver=driver
+                )
+
+                if companies_to_add[i]["country_id"] != None:
+                    await load_relationship_to_kg(
+                        relationship_label="BASED_ON",
+                        head_label="Company",
+                        tail_label="Country",
+                        head_property_id={"company_id": companies_to_add[i]["company_id"]},
+                        tail_property_id={"country_id": companies_to_add[i]["country_id"]},
+                        driver=driver
+                    )
+
+                if companies_to_add[i]["parent_company_id"] != None:
+                    await load_relationship_to_kg(
+                        relationship_label="PART_OF",
+                        head_label="Company",
+                        tail_label="Company",
+                        head_property_id={"company_id": companies_to_add[i]["company_id"]},
+                        tail_property_id={"parent_company_id": companies_to_add[i]["parent_company_id"]},
+                        tail_map_key={"parent_company_id": "company_id"},
+                        driver=driver
+                    )
             
         await load_single_row_to_db(
             table_name="movie_production",
             data={"company_id": company_id, "movie_id": movie_id},
             primary_key_id=company_id,
             engine=engine
+        )
+
+        await load_relationship_to_kg(
+            relationship_label="PRODUCED_BY",
+            head_label="Movie",
+            tail_label="Company",
+            head_property_id={"movie_id": movie_id},
+            tail_property_id={"company_id": company_id},
+            driver=driver
         )
 
 @flow(
@@ -227,6 +303,16 @@ async def movie_production_country_flow(
         data=countries,
         engine=engine
     )
+
+    for movie_id, country_id in countries:
+        await load_relationship_to_kg(
+            relationship_label="produced_in",
+            head_label="Movie",
+            tail_label="Country",
+            head_property_id={"movie_id": movie_id},
+            tail_property_id={"country_id": country_id},
+            driver=driver
+        )
 
 @flow(
     name="Movie Provider ETL",
@@ -277,12 +363,29 @@ async def cast_flow(
             primary_key_id=person_details["person_id"],
             engine=engine
         )
+
+        await load_entity_to_kg(
+            node_label="Person&Actor",
+            node_property=person_details,
+            driver=driver,
+            date_keys=["birthday", "deathday"]
+        )
     
     await load_single_row_to_db(
         table_name="movie_cast",
         data=cast | {"movie_id": movie_id},
         primary_key_id=person_id,
         engine=engine
+    )
+
+    await load_relationship_to_kg(
+        relationship_label="ACTED_IN",
+        head_label="Actor",
+        tail_label="Movie",
+        head_property_id={"person_id": person_id},
+        tail_property_id={"movie_id": movie_id},
+        driver=driver,
+        relationship_property={"role": cast["character"]}
     )
 
 @flow(
@@ -331,11 +434,28 @@ async def crew_flow(
             engine=engine
         )
 
+        await load_entity_to_kg(
+            node_label=f"Person&Crew",
+            node_property=person_details,
+            driver=driver,
+            date_keys=["birthday", "deathday"]
+        )
+
     await load_single_row_to_db(
         table_name="movie_crew",
         data=crew | {"movie_id": movie_id},
         primary_key_id=person_id,
         engine=engine
+    )
+
+    await load_relationship_to_kg(
+        relationship_label=map_departement(crew["department"]),
+        head_label="Movie",
+        tail_label="Crew",
+        head_property_id={"movie_id": movie_id},
+        tail_property_id={"person_id": person_id},
+        driver=driver,
+        relationship_property={"job": crew["job"]}
     )
 
 @flow(
@@ -474,11 +594,12 @@ async def single_movie_flow(movie_id: int, person_limit: int):
     logger.info(f"Get movie casts: {len(movie_details["casts"])}")
     logger.info(f"Get movie crews: {len(movie_details["crews"])}")
 
-    futures = [
-        movie_cast_flow(movie_id, movie_details["casts"], person_limit),
-        movie_crew_flow(movie_id, movie_details["crews"], person_limit),
-        movie_provder_flow(movie_id, movie_details["watch_providers"]),
-    ]
+    # futures = [
+    #     movie_cast_flow(movie_id, movie_details["casts"], person_limit),
+    #     movie_crew_flow(movie_id, movie_details["crews"], person_limit),
+    #     # movie_provder_flow(movie_id, movie_details["watch_providers"]),
+    # ]
+    futures = []
 
     if movie_details["genres"] != []:
         futures.append(movie_genre_flow(movie_id, movie_details["genres"]))
@@ -495,23 +616,23 @@ async def single_movie_flow(movie_id: int, person_limit: int):
     else:
         logger.warning("Production companies doesn't exists!")
 
-    if movie_details["production_countries"] != []:
-        futures.append(movie_production_country_flow(movie_id, movie_details["production_countries"]))
-    else:
-        logger.warning("Production countries doesn't exists!")
+    # if movie_details["production_countries"] != []:
+    #     futures.append(movie_production_country_flow(movie_id, movie_details["production_countries"]))
+    # else:
+    #     logger.warning("Production countries doesn't exists!")
 
-    if movie_details["wiki_id"] != None:
-        futures.append(external_data_flow(movie_id, movie_details["wiki_id"]))
-    else:
-        logger.warning("Wiki ID doesn't exists!")
+    # if movie_details["wiki_id"] != None:
+    #     futures.append(external_data_flow(movie_id, movie_details["wiki_id"]))
+    # else:
+    #     logger.warning("Wiki ID doesn't exists!")
 
-    try:
-        await asyncio.gather(*futures)
+    # try:
+    await asyncio.gather(*futures)
 
-    except Exception as e:
-        logger.error(f"Error processing movie: {e}")
-        logger.warning("Rollback current movie")
-        rollback_movie(movie_id, engine)
+    # except Exception as e:
+    #     logger.error(f"Error processing movie: {e}")
+    #     logger.warning("Rollback current movie")
+    #     rollback_movie(movie_id, engine)
     
-    finally:
-        await asyncio.sleep(5)
+    # finally:
+    #     await asyncio.sleep(5)
