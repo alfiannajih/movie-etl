@@ -2,7 +2,7 @@ import sys
 import os
 import pathlib
 import asyncio
-from datetime import date
+from datetime import date, datetime
 
 sys.path.append(str(pathlib.Path(os.path.dirname(os.path.realpath(__file__)), "src")))
 
@@ -18,9 +18,9 @@ from src.movie_etl.flows.etl_flow import single_movie_flow, engine
     validate_parameters=False
 )
 async def movies_flow(
-    start_date: date=None,
-    end_date: date=None,
-    vote_count_minimum: int=5,
+    start_date: date=datetime.strptime("2024-10-01", "%Y-%m-%d"),
+    end_date: date=datetime.strptime("2024-11-01", "%Y-%m-%d"),
+    vote_count_minimum: int=10,
     movie_limit: int=3,
     person_limit: int=10
 ):
@@ -43,8 +43,8 @@ async def movies_flow(
     
     futures = []
     for movie_id in movie_ids:
-        if is_primary_key_exist_in_table(movie_id, "movie_id", "movies", engine):
-            logger.warning(f"Movie-{movie_id} already exist")
+        # if is_primary_key_exist_in_table(movie_id, "movie_id", "movies", engine):
+            # logger.warning(f"Movie-{movie_id} already exist")
             
         futures.append(process_movie_with_semaphore(single_movie_flow(movie_id, person_limit)))
     await asyncio.gather(*futures)

@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from datetime import date, timedelta
 from prefect.runtime import flow_run
 import pandas as pd
+from neo4j import Driver
 from typing import List, Dict
 
 gender_dict = {
@@ -164,3 +165,17 @@ def parse_property(property: Dict, map_keys: Dict={}, date_keys: List=[]):
     property_str = ", ".join(property_str)
 
     return property_str
+
+def is_node_exist(
+    node_label:str,
+    property_id_name: str,
+    property_id: int,
+    driver: Driver
+):
+    with driver.session() as session:
+        result = session.run(f"MATCH (n: {node_label} {{{property_id_name}: {property_id}}}) RETURN n").single()
+        
+        if result == None:
+            return False
+
+    return True

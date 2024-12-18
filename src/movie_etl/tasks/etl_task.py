@@ -31,7 +31,7 @@ async def get_movie_ids(
     end_date: str=None,
     url: str="https://api.themoviedb.org/3/discover/movie",
     vote_count_minimum: int=10,
-    original_language: str="en"
+    original_language: str=""
 ) -> List:
     # logger = get_run_logger()
     # logger.info("Start retrieving movie_ids")
@@ -274,15 +274,19 @@ async def clean_movie_details(
     casts = [
         {
             "person_id": cast["id"],
-            "character": cast["character"] if cast["character"] != "" else None
+            "name": cast["name"],
+            "gender": map_gender(cast["gender"]),
+            "character": cast["character"] #if cast["character"] != "" else None
         } for cast in movie_details["credits"]["cast"]
     ]
 
     crews = [
         {
             "person_id": crew["id"],
-            "job": crew["job"] if crew["job"] != "" else None,
-            "department": crew["department"] if crew["department"] != "" else None
+            "name": crew["name"],
+            "gender": map_gender(crew["gender"]),
+            "job": crew["job"],
+            "department": crew["department"]
         } for crew in movie_details["credits"]["crew"]
     ]
 

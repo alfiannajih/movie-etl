@@ -1,18 +1,16 @@
-version: '3.8'
-
 services:
-  relational-db:
-    container_name: relational-db
-    image: postgres:latest
-    ports:
-      - "$POSTGRES_PORT:5432"
-    environment:
-      POSTGRES_USER: "$POSTGRES_USER"
-      POSTGRES_PASSWORD: "$POSTGRES_PASSWORD"
-      POSTGRES_DB: "$POSTGRES_DB"
-    volumes:
-      - ./postgres-data:/var/lib/postgresql/data
-      - ./db_scripts/init_scripts:/docker-entrypoint-initdb.d
+  # relational-db:
+  #   container_name: relational-db
+  #   image: postgres:latest
+  #   ports:
+  #     - "$POSTGRES_PORT:5432"
+  #   environment:
+  #     POSTGRES_USER: "$POSTGRES_USER"
+  #     POSTGRES_PASSWORD: "$POSTGRES_PASSWORD"
+  #     POSTGRES_DB: "$POSTGRES_DB"
+  #   volumes:
+  #     - ./postgres-data:/var/lib/postgresql/data
+  #     - ./db_scripts/init_scripts:/docker-entrypoint-initdb.d
   
   kg-db:
     container_name: kg-db
@@ -20,8 +18,15 @@ services:
     ports:
       - "7687:7687"
       - "7474:7474"
+    env_file:
+      - .env
     environment:
+      NEO4J_server_config_strict__validation_enabled: false
       NEO4J_AUTH: "$NEO4J_USER/$NEO4J_PASSWORD"
     volumes:
+      - ./bash_scripts/neo4j_wrapper.sh:/scripts/neo4j_entrypoint.sh
+      - ./bash_scripts/neo4j_init.sh:/scripts/neo4j_init.sh
       - ./neo4j-data:/data
-      - ./neo4j-import:/var/lib/neo4j/import
+      - ./kg_scripts/1_constraints.cypher:/var/lib/neo4j/import/constraints.cypher
+      - ./kg_scripts/2_init_nodes.cypher:/var/lib/neo4j/import/nodes.cypher
+    entrypoint: ["bash", "-c", "chmod +x /scripts/neo4j_entrypoint.sh && /scripts/neo4j_entrypoint.sh"]

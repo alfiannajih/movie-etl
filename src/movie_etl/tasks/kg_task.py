@@ -52,10 +52,13 @@ async def load_relationship_to_kg(
     tail_map_key: Dict={}
 ):
     logger = get_run_logger()
+    
+    relationship_property_str = f"relationship_id: $relationship_id"
+
     if relationship_property != {}:
-        relationship_property_str = parse_property(relationship_property)
-    else:
-        relationship_property_str = ""
+        relationship_property_str += ", " + parse_property(relationship_property)
+        
+    relationship_property["relationship_id"] = f"{next(iter(head_property_id.values()))}-{next(iter(tail_property_id.values()))}"
 
     head_property_str = parse_property(head_property_id, map_keys=head_map_key)
     tail_property_str = parse_property(tail_property_id, map_keys=tail_map_key)
@@ -69,7 +72,7 @@ async def load_relationship_to_kg(
             )
 
     except Exception as e:
-        if "already exists with label" in str(e):
+        if "already exists with type" in str(e):
             logger.warning(f"Relationship already exist!")
         else:
             raise e
