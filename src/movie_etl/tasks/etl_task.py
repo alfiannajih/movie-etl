@@ -8,6 +8,7 @@ from prefect import task, get_run_logger
 from prefect.cache_policies import NONE
 from bs4 import BeautifulSoup
 import re
+from collections import defaultdict
 
 from src.movie_etl.utils.etl import map_gender, extract_metacritic_data
 
@@ -142,126 +143,6 @@ async def scrape_html_content(
     await asyncio.sleep(2)
     return BeautifulSoup(response.content, "html.parser")
 
-# @task(
-#     name="Scrape Data from IMDB",
-#     log_prints=True,
-#     retries=2,
-#     retry_delay_seconds=5,
-#     task_run_name="scrape-data-id-{imdb_id}-from-imdb"
-# )
-# async def scrape_data_from_imdb(
-#     imdb_id: str,
-#     url: str,
-#     endpoint: str=""
-# ) -> BeautifulSoup:
-#     logger = get_run_logger()
-
-#     response = requests.get(
-#         f"{url}/{imdb_id}/{endpoint}",
-#         headers=imdb_headers
-#     )
-
-#     try:
-#         response.raise_for_status()
-#     except requests.exceptions.HTTPError as e:
-#         logger.error("Error fetching IMDB data: " + str(e), exc_info=True)
-#         raise e
-
-#     await asyncio.sleep(2)
-#     return BeautifulSoup(response.content, "html.parser")
-
-# @task(
-#     name="Clean IMDB Reviews",
-#     log_prints=True,
-#     retries=2,
-#     task_run_name="clean-imdb-reviews-of-{movie_id}"
-# )
-# async def clean_imdb_reviews(
-#     movie_id: str,
-#     soup: BeautifulSoup,
-# ) -> List:
-#     logger = get_run_logger()
-#     reviews = soup.find_all("div", class_="imdb-user-review")
-
-#     cleaned_reviews = []
-    
-#     for review in reviews:
-#         review_id = review["data-review-id"]
-#         try:
-#             rating = int(review.find("div", class_="ipl-ratings-bar").text.replace("\n", "").split("/")[0])
-#         except:
-#             logger.warning(f"Review {review_id} has no rating")
-#             rating = None
-        
-#         review_title = review.find("a", class_="title").text.strip()
-#         review_date = pd.to_datetime(review.find("span", class_="review-date").text).strftime("%Y-%m-%d")
-#         spoiler = True if review.find("span", class_="spoiler-warning") != None else False
-#         review_content = review.find("div", class_="text").text.strip()
-#         helpfulness = review.find("div", class_="actions text-muted").text.strip().split("\n")[0]
-#         helpful, total = [int(i) for i in re.findall(r'\d+', helpfulness)]
-#         unhelpful = total - helpful
-
-#         user_details =  review.find("span", class_="display-name-link")
-#         user_id = user_details.a["href"].split("/")[2]
-
-#         cleaned_reviews.append({
-#             "review_id": review_id,
-#             "user_id": user_id,
-#             "movie_id": movie_id,
-#             "rating": rating,
-#             "review_title": review_title,
-#             "review_date": review_date,
-#             "spoiler": spoiler,
-#             "review_content": review_content,
-#             "helpful": helpful,
-#             "unhelpful": unhelpful
-#         })
-#     await asyncio.sleep(2)
-#     return cleaned_reviews
-
-# @task(
-#     name="Clean IMDB User Details",
-#     log_prints=True,
-#     retries=2,
-#     task_run_name="clean-imdb-user-details-of-{imdb_user_id}"
-# )
-# async def clean_imdb_user_details(
-#     imdb_user_id: str,
-#     soup: BeautifulSoup
-# ) -> Dict:
-#     user_details = soup.find("div", class_="header")
-
-#     user_name = user_details.h1.text
-#     date_joined = pd.to_datetime(user_details.find("div", class_="timestamp").text.split("since")[1].strip())
-#     # user_badges = user_details.find("div", class_="badges").find_all("div", class_="badge-frame")
-
-#     await asyncio.sleep(2)
-#     return {
-#         "user_id": imdb_user_id,
-#         "user_name": user_name,
-#         "date_joined": date_joined,
-#         # "user_badges": user_badges
-#     }
-
-# @task(
-#     name="Clean IMDB User Badges",
-#     log_prints=True,
-#     retries=2,
-#     task_run_name="clean-imdb-user-badges-of-{imdb_user_id}"
-# )
-# async def clean_imdb_user_badges(
-#     imdb_user_id: str,
-#     user_badge: Tag
-# ) -> Dict:
-#     badge_name = user_badge.find("div", class_="name").text
-#     badge_description = user_badge.find("div", class_="value").text
-
-#     await asyncio.sleep(2)
-#     return {
-#         "badge_name": badge_name,
-#         "badge_description": badge_description
-#     }
-
 @task(
     name="Clean Movie Details",
     log_prints=True,
@@ -320,29 +201,6 @@ async def clean_movie_details(
         "spoken_languages": spoken_languages,
         "watch_providers": watch_providers
     }
-
-# @task(
-#     name="Clean Watch Provider Details",
-#     log_prints=True,
-#     task_run_name="clean-watch-provider-details-of-{movie_id}"
-# )
-# async def clean_watch_provider_details(
-#     movie_id: int,
-#     watch_providers: Dict
-# ) -> List[Dict]:
-#     clean_providers = []
-
-#     for country_id, details in watch_providers.items():
-#         buy = [
-#             country_id, {"provider_id": detail["provider_id"] for detail in details["buy"]}
-#         ]
-#         sell = [
-#             country_id, {"provider_id": detail["provider_id"] for detail in details["buy"]}
-#         ]
-#         buy = [
-#             country_id, {"provider_id": detail["provider_id"] for detail in details["buy"]}
-#         ]
-        
 
 @task(
     name="Clean Collection Details",
@@ -409,19 +267,22 @@ async def clean_watch_providers(
     movie_id: int,
     watch_providers: Dict
 ) -> List[Tuple]:
-    movie_providers = []
-    for country, details in watch_providers["results"].items():
-        if details.get("buy") != None:
-            movie_providers.extend([(movie_id, country, b["provider_id"], "buy") for b in details.get("buy")])
+    providers = defaultdict(lambda: {"buy": [], "rent": [], "subscription": []})
 
-        if details.get("rent") != None:
-            movie_providers.extend([(movie_id, country, b["provider_id"], "rent") for b in details.get("rent")])
+    for region, details in watch_providers["results"].items():
+        for key in ['buy', 'rent', 'flatrate']:
+            if key in details:
+                for provider in details[key]:
+                    provider_id = provider['provider_id']
+                    if key == 'flatrate':
+                        providers[provider_id]['subscription'].append(region)
+                    else:
+                        providers[provider_id][key].append(region)
+    for provider in providers.values():
+        provider = {key: value for key, value in provider.items() if value}
 
-        if details.get("flatrate") != None:
-            movie_providers.extend([(movie_id, country, b["provider_id"], "flatrate") for b in details.get("flatrate")])
-    
     await asyncio.sleep(2)
-    return movie_providers
+    return providers
 
 @task(
     name="Clean Movie Genres",

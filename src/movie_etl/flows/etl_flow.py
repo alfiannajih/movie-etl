@@ -80,17 +80,41 @@ async def movie_provder_flow(
 ):
     logger = get_run_logger()
 
-    add_to_db = await clean_watch_providers(movie_id, movie_providers)
-    
-    if len(add_to_db) > 0:
-        await load_multi_row_to_db(
-            table_name="movie_provider",
-            columns=["movie_id", "country_id", "provider_id", "type"],
-            data=add_to_db,
-            engine=engine
-        )
-    else:
-        logger.warning("Watch providers doesn't exists")
+    providers = await clean_watch_providers(movie_id, movie_providers)
+    # {provider_id: {buy: [region1, region2], rent: [], "subscription": []}}
+    for provider_id, details in providers.items():
+        for watch_type in ["buy", "rent", "subscription"]:
+            if details[watch_type] != []:
+                await load_relationship_to_kg(
+                    relationship_label="AVAILABLE_ON",
+                    head_label="Movie",
+                    tail_label="WatchProvider",
+                    head_property_id={"movie_id": movie_id},
+                    tail_property_id={"provider_id": provider_id},
+                    relationship_property={"region": details[watch_type], "type": watch_type},
+                    driver=driver
+                )
+
+    # for country, provider_id, provider_type in add_to_db:
+    #     await load_relationship_to_kg(
+    #         relationship_label="AVAILABLE_ON",
+    #         head_label="Movie",
+    #         tail_label="WatchProvider",
+    #         head_property_id={"movie_id": movie_id},
+    #         tail_property_id={"provider_id": provider_id},
+    #         relationship_property={"region": country, "type": provider_type},
+    #         driver=driver
+    #     )
+
+    # if len(add_to_db) > 0:
+    #     await load_multi_row_to_db(
+    #         table_name="movie_provider",
+    #         columns=["movie_id", "country_id", "provider_id", "type"],
+    #         data=add_to_db,
+    #         engine=engine
+    #     )
+    # else:
+    #     logger.warning("Watch providers doesn't exists")
 
 @flow(
     name="External Data ETL",
@@ -411,12 +435,6 @@ async def cast_flow(
     logger = get_run_logger()
     if not is_node_exist("Person", "person_id", person_id, driver):
         logger.warning(f"Person with primary id of {person_id} doesn't exists!")
-        # person_details = await get_data_from_tmdb_api(
-        #     id=cast["person_id"],
-        #     url="https://api.themoviedb.org/3/person",
-        #     endpoint_name="person"
-        # )
-        # person_details = await clean_person_details(person_details["id"], person_details)
 
         await load_entity_to_kg(
             node_label="Person",
@@ -471,12 +489,6 @@ async def crew_flow(
     logger = get_run_logger()
     if not is_node_exist("Person", "person_id", person_id, driver):
         logger.warning(f"Person with primary id of {person_id} doesn't exists!")
-        # person_details = await get_data_from_tmdb_api(
-        #     id=crew["person_id"],
-        #     url="https://api.themoviedb.org/3/person",
-        #     endpoint_name="person"
-        # )
-        # person_details = await clean_person_details(person_details["id"], person_details)
 
         await load_entity_to_kg(
             node_label=f"Person",
@@ -531,9 +543,9 @@ async def single_movie_flow(movie_id: int, person_limit: int):
     logger.info(f"Get movie crews: {len(movie_details["crews"])}")
 
     futures = [
-        movie_cast_flow(movie_id, movie_details["casts"], person_limit),
-        movie_crew_flow(movie_id, movie_details["crews"], person_limit),
-        # movie_provder_flow(movie_id, movie_details["watch_providers"]),
+        # movie_cast_flow(movie_id, movie_details["casts"], person_limit),
+        # movie_crew_flow(movie_id, movie_details["crews"], person_limit),
+        movie_provder_flow(movie_id, movie_details["watch_providers"]),
     ]
     # futures = []
 
