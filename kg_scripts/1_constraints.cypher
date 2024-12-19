@@ -12,6 +12,8 @@ CREATE CONSTRAINT relationship_constraint_movie_production IF NOT EXISTS FOR ()-
 CREATE CONSTRAINT relationship_constraint_movie_language IF NOT EXISTS FOR ()-[r: HAS_LANGUAGE]-() REQUIRE r.relationship_id IS UNIQUE;
 CREATE CONSTRAINT relationship_constraint_movie_company IF NOT EXISTS FOR ()-[r: BASED_ON]-() REQUIRE r.relationship_id IS UNIQUE;
 CREATE CONSTRAINT relationship_constraint_movie_genre IF NOT EXISTS FOR ()-[r: HAS_GENRE]-() REQUIRE r.relationship_id IS UNIQUE;
+CREATE CONSTRAINT relationship_constraint_movie_provider IF NOT EXISTS FOR ()-[r: AVAILABLE_ON]-() REQUIRE r.relationship_id AND r.type IS UNIQUE;
+
 CREATE CONSTRAINT relationship_constraint_movie_writter IF NOT EXISTS FOR ()-[r: WRITTEN_BY]-() REQUIRE r.relationship_id IS UNIQUE;
 CREATE CONSTRAINT relationship_constraint_movie_editor IF NOT EXISTS FOR ()-[r: EDITED_BY]-() REQUIRE r.relationship_id IS UNIQUE;
 CREATE CONSTRAINT relationship_constraint_movie_crew IF NOT EXISTS FOR ()-[r: CREW_BY]-() REQUIRE r.relationship_id IS UNIQUE;
