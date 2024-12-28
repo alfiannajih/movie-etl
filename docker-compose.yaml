@@ -10,6 +10,7 @@ services:
     environment:
       NEO4J_server_config_strict__validation_enabled: false
       NEO4J_AUTH: "$NEO4J_USER/$NEO4J_PASSWORD"
+      NEO4JLABS_PLUGINS: '["apoc"]' 
     volumes:
       - ./bash_scripts/neo4j_wrapper.sh:/scripts/neo4j_entrypoint.sh
       - ./bash_scripts/neo4j_init.sh:/scripts/neo4j_init.sh
